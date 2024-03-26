@@ -1,5 +1,10 @@
 <?php
 require 'connection.php';
+
+session_start();
+if (!isset($_SESSION['username'])) {
+    
+}
 ?>
 
 <!DOCTYPE html>
@@ -138,7 +143,23 @@ require 'connection.php';
                                         <div class="col mr-2">
                                             <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                                 JUMLAH PRODUCT</div>
-                                            <div class="h5 mb-0 font-weight-bold text-gray-800">18</div>
+                                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                            <?php 
+                                                $query = "SELECT COUNT(*) AS total_product FROM tb_product";
+                                                $result = $connection->query($query);
+                                                
+                                                if ($result) {
+                                                    if ($row = $result->fetch_assoc()) {
+                                                        $total_product = $row['total_product'];
+                                                        echo "Total product : $total_product";
+                                                    } else {
+                                                        echo "No users found with role 'user'.";
+                                                    }
+                                                } else {
+                                                    echo "Error: " . $connection->error;
+                                                }
+                                            ?>
+                                            </div>
                                         </div>
                                         <div class="col-auto">
                                             <i class="fas fa-comments fa-2x text-gray-300"></i>

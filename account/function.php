@@ -56,14 +56,15 @@ class database
 
 class account
 {
-    private $username, $password, $email, $confirmPassword;
+    private $username, $password, $email, $confirmPassword,$checkbox;
 
-    public function __construct($username = "username", $password = "password", $confirmPassword = "confirmPassword", $email = "email")
+    public function __construct($username = "username", $password = "password", $confirmPassword = "confirmPassword", $email = "email", $checkbox = "checkbox")
     {
         $this->username = $username;
         $this->password = $password;
         $this->confirmPassword = $confirmPassword;
         $this->email = $email;
+        $this->checkbox = $checkbox;
     }
 
     //login 
@@ -80,22 +81,39 @@ class account
 
         $password = $this->password;
 
+
         // Cek jika user ditemukan
         if ($user = $result->fetch_assoc()) {
             // Verifikasi password
             if (password_verify($password, $user['password'])) {
+                //jika chcekbox bernilai 1;
+                if ($this->checkbox == 1) {
+                    //buat cookie
+                    setcookie('id', $user['id_account'], time() + 600);
+                    setcookie('key', hash('sha256', $user['username']));
+                }
                 // Password benar, login berhasil
-                $_SESSION['role'] = $user['role']; // Menyimpan role ke dalam session
-    
+                $_SESSION['role'] = $user['role'];
+
                 // Redireksi berdasarkan role
                 if ($user['role'] == 'admin') {
+
                     echo "<script>
                         alert('LOGIN BERHASIL!');
                     </script>";
+
+                    //jika chcekbox bernilai 1;
+                    if ($this->checkbox == 1) {
+                        //buat cookie
+                        setcookie('id', $user['id_account'], time() + 600);
+                        setcookie('key', hash('sha256', $user['username']));
+                    }
+                    
                     session_start(); // Memulai sesi 
                     $_SESSION['username'] = $this->username;
                     header('Location: ../admin/index.php');
                     exit(); // Menambahkan exit setelah header untuk menghentikan eksekusi script lebih lanjut
+
                 } else if ($user['role'] == 'user') {
                     echo "<script>
                         alert('LOGIN BERHASIL!');
@@ -126,10 +144,10 @@ class account
 
         $db = new database();
         $lastIDFromDB = $db->getLastUserID(); // Dapatkan lastID dari database
-    
+
         $generator = new IDGenerator($lastIDFromDB); // Inisialisasi IDGenerator dengan lastID
         $newID = $generator->generateID(); // Generate ID baru
-    
+
         //check username sudah ada atau belum
         $query = $db->getConnection()->query("SELECT username FROM tb_account WHERE username = '$this->username'");
         if ($query->fetch_assoc()) {
@@ -147,8 +165,13 @@ class account
         </script>";
             return false;
         }
+
+        // var_dump($this->password);
+        // var_dump($this->confirmPassword);
+        // exit;
+
         // Konfirmasi password
-        if ($this->password !== $this->confirmPassword) {
+        if ($this->password != $this->confirmPassword) {
             echo "<script>
         alert('Password tidak sama!');
         </script>";
@@ -167,7 +190,6 @@ class account
             echo "<script>
         alert('Pendaftaran berhasil!');
         </script>";
-        
         } else {
             echo "<script>
         alert('Terjadi kesalahan saat mendaftar.');
@@ -175,5 +197,18 @@ class account
         }
     }
 
-    
+    public function logout()
+    {
+        //delete SESSION
+        session_start();
+        $_SESSION = [];
+        session_unset();
+        session_destroy();
+
+        //delete COOKIE
+        setcookie('id', '', time() - 3600);
+        setcookie('key', '', time() - 3600);
+
+        header('location: signup.php');
+    }
 }

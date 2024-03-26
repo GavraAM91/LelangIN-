@@ -58,7 +58,7 @@ class product
     private $id, $image, $name, $description, $quantity, $price;
 
     //construct
-    public function __construct($id="id" ,$image = "image", $name = "name", $description = "description", $quantity = "quantity", $price = "price")
+    public function __construct($id = "id", $image = "image", $name = "name", $description = "description", $quantity = "quantity", $price = "price")
     {
         $this->id = $id;
         $this->image = $image;
@@ -67,6 +67,7 @@ class product
         $this->quantity = $quantity;
         $this->price = $price;
     }
+
 
     public function addProduct()
     {
@@ -80,24 +81,22 @@ class product
         date_default_timezone_set("Asia/Jakarta");
         $date = date("Y-m-d H:i:s");
 
-        // $sql = $db->getConnection()->prepare("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`, `quantity`, `price`,`date_added`)  
-        //     VALUES (?,?,?,?,?,?,?)");
+        $sql = $db->getConnection()->prepare("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`, `quantity`, `price`,`date_added`)  
+            VALUES (?,?,?,?,?,?,?)");
 
-        // $sql->bind_param('sssssss', $newID, $this->image, $this->name, $this->description, $this->quantity, $this->price, $date);
+        $sql->bind_param('sssssss', $newID, $this->image, $this->name, $this->description, $this->quantity, $this->price, $date);
 
-        $sql = $db->getConnection()->query("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`, `quantity`, `price`,`date_added`)  
-        VALUES ('$newID', '$this->image', '$this->name', '$this->description', '$this->quantity', '$this->price', '$date')");
-
-        if ($sql) {
+        // $sql = $db->getConnection()->query("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`, `quantity`, `price`,`date_added`)  
+        //     VALUES ('$newID', '$this->image', '$this->name', '$this->description', '$this->quantity', '$this->price', '$date')");
+        if ($sql->execute()) {
             echo "<script>
-        alert('input product berhasil!');
-        </script>";
+                    alert('input product berhasil!');
+                    </script>";
             header('Location: product.php');
         } else {
-            echo "Error: ";
             echo "<script>
-                alert('Terjadi kesalahan input product');
-            </script>";
+                    alert('Terjadi kesalahan input product');
+                </script>";
         }
     }
 
@@ -109,15 +108,23 @@ class product
         date_default_timezone_set("Asia/Jakarta");
         $date = date("Y-m-d H:i:s");
 
-        // $sql = $db->getConnection()->prepare("UPDATE `tb_product` SET `image`=?,`name`=?,`description`=?,`quantity`=?,`price`=?,`date_added`=? WHERE id_product=? ");
-        // $sql->bind_param('sssssss', $this->image, $this->name, $this->description, $this->quantity, $this->price, $date, $this->id);
-
-         $sql = $db->getConnection()->query("UPDATE `tb_product` SET `image`='$this->image',`name`='$this->name',`description`='$this->description',`quantity`='$this->quantity',`price`='$this->price',`date_added`='$date' WHERE id_product='$this->id'");
-        if ($sql) {
+        //jika image empty atau kosong
+        if(empty($this->image)) {
+            $sql = $db->getConnection()->prepare("UPDATE `tb_product` SET `name`=?,`description`=?,`quantity`=?,`price`=?,`date_added`=? WHERE id_product=? ");
+            $sql->bind_param('ssssss', $this->name, $this->description, $this->quantity, $this->price, $date, $this->id);
+        } else {    
+        //jika image berisi
+       //update data
+        $sql = $db->getConnection()->prepare("UPDATE `tb_product` SET `image`=?,`name`=?,`description`=?,`quantity`=?,`price`=?,`date_added`=? WHERE id_product=? ");
+        $sql->bind_param('sssssss', $this->image, $this->name, $this->description, $this->quantity, $this->price, $date, $this->id);
+        }
+        // $sql = $db->getConnection()->query("UPDATE `tb_product` SET `image`='$this->image',`name`='$this->name',`description`='$this->description',
+        //         `quantity`='$this->quantity',`price`='$this->price',`date_added`='$date' WHERE id_product='$this->id'");
+        
+        if ($sql->execute()) {
             echo "<script>
                 alert('Data berhasil di update');
             </script>";
-
             header("Location: product.php");
             exit;
         } else {
@@ -150,4 +157,8 @@ class product
             return false;
         }
     }
+}
+
+class timer {
+    
 }

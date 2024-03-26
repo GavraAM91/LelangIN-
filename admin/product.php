@@ -2,10 +2,10 @@
 include 'connection.php';
 require 'function.php';
 
-// session_start();
-// if (!isset($_SESSION['username'])) {
-//     header('location: ../account/login.php');
-// }
+session_start();
+if (!isset($_SESSION['username'])) {
+    header('location: ../account/login.php');
+}
 
 
 //add product
@@ -24,7 +24,7 @@ if (isset($_POST['add_product'])) {
     if ($error === 4) {
         echo "<script>alert('pilih gambar terlebih dahulu!');</script>";
         header("Location: product.php");
-        return false;   
+        return false;
     }
 
     $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
@@ -36,71 +36,105 @@ if (isset($_POST['add_product'])) {
         return false;
     }
 
-    if ($ukuran_file > 500000) {
+    if ($ukuran_file > 5242880) {
         echo "<script>alert('ukuran terlalu besar!');</script>";
         header("Location: product.php");
         exit;
     }
 
-    $newImage = uniqid() . '.' . $ekstensiGambar;
-    $storage = '../data_image/' . $newImage;
+    //jika ingin data gambar diacak
+    // $newImage = uniqid() . '.' . $ekstensiGambar;
+    // $storage = '../data_image/' . $newImage;
 
-    if (move_uploaded_file($tmp_file, $storage)) {
-        // Pastikan constructor class `product` sesuai dengan parameter yang diberikan
-        $product = new product($newImage, $name, $description, $quantity, $price);
+    // Jika ingin data gambar tetep sama dengan yang diinput
+    $targetDir = '../data_image/';
+    $targetFile = $targetDir . basename($image);
+
+    //gunakan ini jika ingin data gambar diacak
+    // if (move_uploaded_file($tmp_file, $storage)) {
+    if (move_uploaded_file($tmp_file, $targetFile)) {
+        $product = new product(null, $image, $name, $description, $quantity, $price);
         $product->addProduct();
     } else {
-        echo "Gagal mengunggah gambar. Kode Kesalahan: " . $error;  
+        echo "Gagal mengunggah gambar. Kode Kesalahan: " . $error;
         echo "<br><a href='product.php'>Kembali Ke Form</a>";
     }
 }
 
-// if (isset($_POST['edit_product'])) {
-//     $id = $_POST['id_product'];
-//     $name = $_POST['product_name'];
-//     $description = $_POST['description'];
-//     $price = $_POST['price'];
-//     $quantity = $_POST['quantity'];
+if (isset($_POST['edit_product'])) {
 
-//     // Proses upload gambar
-//     $image = $_FILES['image']['name'];
-//     $ukuran_file = $_FILES['image']['size'];
-//     $error = $_FILES['image']['error'];
-//     $tmp_file = $_FILES['image']['tmp_name'];
+    $id = $_POST['id_product'];
+    $name = $_POST['product_name'];
+    $description = $_POST['description'];
+    $price = $_POST['price'];
+    $quantity = $_POST['quantity'];
 
-//     if ($error === 4) {
-//         echo "<script>alert('pilih gambar terlebih dahulu!');</script>";
-//         header("Location: product.php");
-//         return false;   
-//     }
+    // Proses upload gambar
+    $image = $_FILES['image']['name'];
 
-//     $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
-//     $ekstensiGambar = explode('.', $image);
-//     $ekstensiGambar = strtolower(end($ekstensiGambar));
+    //jika data image kosong
+    if(empty($image)) {
+        $query = new product($id, null, $name, $description, $quantity, $price);
+        $query->editProduct();
+    } else { //jika ada data dalam $image
+    $ukuran_file = $_FILES['image']['size'];
+    $error = $_FILES['image']['error'];
+    $tmp_file = $_FILES['image']['tmp_name'];
 
-//     if (!in_array($ekstensiGambar, $ekstensiGambarValid)) {
-//         echo "<script>alert('yang anda upload bukan gambar!');</script>";
-//         return false;
-//     }
+    // var_dump($image);
+    // exit;
+    if ($error === 4) {
+        echo "<script>alert('pilih gambar terlebih dahulu!');</script>";
+        header("Location: product.php");
+        return false;
+    }
 
-//     if ($ukuran_file > 500000) {
-//         echo "<script>alert('ukuran terlalu besar!');</script>";
-//         header("Location: product.php");
-//         exit;
-//     }
+    $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
+    $ekstensiGambar = explode('.', $image);
+    $ekstensiGambar = strtolower(end($ekstensiGambar));
 
-//     $newImage = uniqid() . '.' . $ekstensiGambar;
-//     $storage = '../data_image/' . $newImage;
-    
-//     if (move_uploaded_file($tmp_file, $storage)) {
-//         // Pastikan constructor class `product` sesuai dengan parameter yang diberikan
-//         $product = new product($id, $newImage, $name, $description, $quantity, $price);
-//         $product->editProduct(); 
-//     } else {
-//         echo "Gagal mengunggah gambar. Kode Kesalahan: " . $error;  
-//         echo "<br><a href='product.php'>Kembali Ke Form</a>";
-//     }
-// }
+    if (!in_array($ekstensiGambar, $ekstensiGambarValid)) {
+        echo "<script>alert('yang anda upload bukan gambar!');</script>";
+        header("Location: product.php");
+        return false;
+    }
+
+    if ($ukuran_file > 5242880) {
+        echo "<script>alert('ukuran terlalu besar!');</script>";
+        header("Location: product.php");
+        exit;
+    }
+
+    //jika pingin nama gambar di acak
+    // $newImage = uniqid() . '.' . $ekstensiGambar;
+    // $storage = '../data_image/' . $newImage;
+
+    //tanggal
+    $date = date("Y-m-d H:i:s");
+
+    //jika ingin nama gambar sama seperti yang diinput
+    $targetDir = '../data_image/';
+    $targetFile = $targetDir . basename($image);
+
+    // gunakan ini jika ingin data gambar diacak
+    // if (move_uploaded_file($tmp_file, $storage)) {
+    if (move_uploaded_file($tmp_file, $targetFile)) {
+        $query = new product($id, $image, $name, $description, $quantity, $price);
+        $query->editProduct();
+    } else {
+        echo "Gagal mengunggah gambar. Kode Kesalahan: " . $error;
+        echo "<br><a href='product.php'>Kembali Ke Form</a>";
+    }
+}
+}
+
+//delete product
+if (isset($_POST['delete_product'])) {
+    $id = $_POST['id_product'];
+
+    $query = new product($id, null, null, null, null, null);
+    $query->deleteProduct();
+}
 
 
 ?>
@@ -164,11 +198,10 @@ if (isset($_POST['add_product'])) {
                         <h1 class="h3 mb-2 text-gray-800">Product</h1>
                         <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
                             For more information about DataTables, please visit the <a target="_blank" href="https://datatables.net">official DataTables documentation</a>.</p>
-
-
+        
                         <!-- Button Add Product-->
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#productModal">
-                            Tambah Buku
+                            Add Product
                         </button>
 
                         <!-- Modal ADD PRODUCT -->
@@ -263,7 +296,7 @@ if (isset($_POST['add_product'])) {
                                             ?>
                                                 <tr>
                                                     <td><?= $rows['id_product']; ?></td>
-                                                    <td><img src="../data_image/<?php echo $rows['image']; ?>" style="width: 250px; height: 250px;"></td>
+                                                    <td><img src="../data_image/<?php echo $rows['image']; ?>" style="width: 250px; height: 250px; object-fit: contain;"></td>
                                                     <td><?= $rows['name']; ?></td>
                                                     <td><?= $rows['description']; ?></td>
                                                     <td><?= $rows['price']; ?></td>
@@ -284,10 +317,12 @@ if (isset($_POST['add_product'])) {
                                                                     </div>
                                                                     <div class="modal-body">
                                                                         <form method="post" action="" enctype="multipart/form-data">
-                                                                        <input type="hidden" name="id_product" value="<?= $rows['id_product']; ?>">
+                                                                            <input type="hidden" name="id_product" id="id_product" value="<?= $rows['id_product']; ?>">
+
                                                                             <div class="form-group">
-                                                                                <label for="image" class="form-label">image : </label>
-                                                                                <input type="file" class="form-control" name="image" id="image" placeholder="Masukkan image" value="<?= $rows['image']; ?>">
+                                                                                <label for="image" class="form-label">Image</label>
+                                                                                <input type="file" name="image" id="image" accept=".jpg, .jpeg, .png" value="<?= $rows['image'];?>">
+                                                                                
                                                                             </div>
                                                                             <div class="form-group">
                                                                                 <label for="product_name">product name</label>
@@ -313,10 +348,12 @@ if (isset($_POST['add_product'])) {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        <!-- <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_data_<?php echo $rows['id_product']; ?>">
-                                                            Delete
-                                                        </button> -->
-                                                    
+                                                            <button type="submit" class="btn btn-danger" name="delete_product" id="delete_product">
+                                                                delete product
+                                                            </button>
+                                                        </form>
+
+
                                                     </td>
                                                 </tr>
                                             <?php
@@ -332,7 +369,8 @@ if (isset($_POST['add_product'])) {
             </div>
         </div>
     </div>
-
+    
+    
 
 
     </div>
