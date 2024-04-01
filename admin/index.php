@@ -3,8 +3,14 @@ require 'connection.php';
 
 session_start();
 if (!isset($_SESSION['username'])) {
-    
+    //direct into login page
+    header("Location: index.php");
 }
+
+if($_SESSION['role'] != "admin") {
+    header("Location: ../index.php");
+}
+
 ?>
 
 <!DOCTYPE html>

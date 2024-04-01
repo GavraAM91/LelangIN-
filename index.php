@@ -1,6 +1,6 @@
 <?php
 
-require 'connection.php';
+require 'database/database.php';
 
 ?>
 
@@ -15,7 +15,7 @@ require 'connection.php';
    <meta name="description" content="">
    <meta name="author" content="">
 
-   <title>LelangIn dulu</title>
+   <title>LelangIn | Home</title>
 
    <!-- Custom fonts for this template-->
    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -26,45 +26,13 @@ require 'connection.php';
    <link rel="stylesheet" href="style/style.css">
    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
+
 </head>
 
 <body>
-   <?php
-   session_start(); // Pastikan memulai session di awal skrip
-   if (!isset($_SESSION['username'])) { // Jika pengguna belum login
-   ?>
-      <nav class="navbar">
-         <div class="logo">
-            <a href="#">LelangIn</a>
-         </div>
-         <div class="navdiv">
-            <ul>
-               <li><a href="index.php">Home</a></li>
-               <li><a href="about.php">About</a></li>
-               <li><a href="cart.php">Cart</a></li>
-               <button><a href="account/login.php">LogIn</a></button>
-               <button><a href="account/signup.php">SignUp</a></button>
-            </ul>
-         </div>
-      </nav>
-   <?php
-   } else { // Jika pengguna sudah login
-   ?>
-      <nav class="navbar">
-         <div class="logo">
-            <a href="#">LelangIn</a>
-         </div>
-         <div class="navdiv">
-            <ul>
-               <li><a href="index.php">Home</a></li>
-               <li><a href="about.php">About</a></li>
-               <li><a href="cart.php">Cart</a></li>
-               <button><a href="account.php">account</a></button>
-            </ul>
-         </div>
-      </nav>
-   <?php
-   }
+   <!-- apply header -->
+   <?php 
+      require_once 'components/header.php';
    ?>
 
    <div class="hero-section">
@@ -114,21 +82,9 @@ require 'connection.php';
                               <div class="col-md-8">
                                  <div class="card-body">
                                     <h5 class="card-title"><?php echo $fetch_product['name']; ?></h5>
-
-                                    <?php 
-                                       if($auction_data['price'] != 0) {
-                                    ?>
-                                    <p class="card-text">Harga Lelang :  <b><?= $auction_data['price']; ?></b></p>
-                                    <?php 
-                                       }
-
-                                       if($auction_data['price'] == null) {
-                                    ?>
-                                       <p class="card-text">Harga awal : <b><?= $fetch_product['price']; ?></b></p>
-                                    <?php 
-                                       }
-                                    ?>
+                                       <p class="card-text">Start From : <b><?= $fetch_product['price']; ?></b></p>
                                     <p class="card-text"><?= $description; ?></p>
+                                   
                                     <a href="auction/auction.php?id=<?= $fetch_product['id_product']; ?>">
                                     <button type="button" class="btn btn-outline-warning" >
                                        More Details 
@@ -152,7 +108,6 @@ require 'connection.php';
    <div class="footer">
 
    </div>
-
 </body>
 
 </html>

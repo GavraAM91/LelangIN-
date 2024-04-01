@@ -58,13 +58,12 @@ class product
     private $id, $image, $name, $description, $quantity, $price;
 
     //construct
-    public function __construct($id = "id", $image = "image", $name = "name", $description = "description", $quantity = "quantity", $price = "price")
+    public function __construct($id = "id", $image = "image", $name = "name", $description = "description", $price = "price")
     {
         $this->id = $id;
         $this->image = $image;
         $this->name = $name;
         $this->description = $description;
-        $this->quantity = $quantity;
         $this->price = $price;
     }
 
@@ -77,14 +76,10 @@ class product
         $generator = new IDGenerator($lastIDFromDB); // Inisialisasi IDGenerator dengan lastID
         $newID = $generator->generateID(); // Generate ID baru
 
-        //for time 
-        date_default_timezone_set("Asia/Jakarta");
-        $date = date("Y-m-d H:i:s");
-
-        $sql = $db->getConnection()->prepare("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`, `quantity`, `price`,`date_added`)  
+        $sql = $db->getConnection()->prepare("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`,`price`)  
             VALUES (?,?,?,?,?,?,?)");
 
-        $sql->bind_param('sssssss', $newID, $this->image, $this->name, $this->description, $this->quantity, $this->price, $date);
+        $sql->bind_param('sssssss', $newID, $this->image, $this->name, $this->description, $this->price,);
 
         // $sql = $db->getConnection()->query("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`, `quantity`, `price`,`date_added`)  
         //     VALUES ('$newID', '$this->image', '$this->name', '$this->description', '$this->quantity', '$this->price', '$date')");
@@ -109,18 +104,18 @@ class product
         $date = date("Y-m-d H:i:s");
 
         //jika image empty atau kosong
-        if(empty($this->image)) {
-            $sql = $db->getConnection()->prepare("UPDATE `tb_product` SET `name`=?,`description`=?,`quantity`=?,`price`=?,`date_added`=? WHERE id_product=? ");
-            $sql->bind_param('ssssss', $this->name, $this->description, $this->quantity, $this->price, $date, $this->id);
-        } else {    
-        //jika image berisi
-       //update data
-        $sql = $db->getConnection()->prepare("UPDATE `tb_product` SET `image`=?,`name`=?,`description`=?,`quantity`=?,`price`=?,`date_added`=? WHERE id_product=? ");
-        $sql->bind_param('sssssss', $this->image, $this->name, $this->description, $this->quantity, $this->price, $date, $this->id);
+        if (empty($this->image)) {
+            $sql = $db->getConnection()->prepare("UPDATE `tb_product` SET `name`=?,`description`=?,`price`=? WHERE id_product=? ");
+            $sql->bind_param('ssssss', $this->name, $this->description, $this->price, $date, $this->id);
+        } else {
+            //jika image berisi
+            //update data
+            $sql = $db->getConnection()->prepare("UPDATE `tb_product` SET `image`=?,`name`=?,`description`=?,`price`=? WHERE id_product=? ");
+            $sql->bind_param('sssssss', $this->image, $this->name, $this->description, $this->price, $this->id);
         }
         // $sql = $db->getConnection()->query("UPDATE `tb_product` SET `image`='$this->image',`name`='$this->name',`description`='$this->description',
         //         `quantity`='$this->quantity',`price`='$this->price',`date_added`='$date' WHERE id_product='$this->id'");
-        
+
         if ($sql->execute()) {
             echo "<script>
                 alert('Data berhasil di update');
@@ -159,6 +154,52 @@ class product
     }
 }
 
-class timer {
-    
+class timer
+{   
+    private $duration;
+
+    public function __construct($auctionTime)
+    {
+        // Menentukan durasi berdasarkan pilihan waktu lelang
+        switch ($auctionTime) {
+            case '10m':
+                $this->duration = '+10 minutes';
+                break;
+            case '1d':
+                $this->duration = '+1 day';
+                break;
+            default:
+                // Default ke 10 menit jika pilihan tidak dikenali
+                $this->duration = '+10 minutes';
+        }
+    }
+
+    public function time()
+    {
+        $timeZone = new DateTimeZone('Asia/Jakarta');
+        $endTime = new DateTime('now', $timeZone);
+        $endTime->modify($this->duration);
+
+        // Mengubah objek DateTime menjadi timestamp UNIX
+        $endTimeTimestamp = $endTime->getTimestamp();
+
+        $currentTime = time();
+        $remainingSeconds = $endTimeTimestamp - $currentTime;
+
+        // Calculate remaining time
+        $days = floor($remainingSeconds / (60 * 60 * 24));
+        $hours = floor(($remainingSeconds - ($days * 60 * 60 * 24)) / (60 * 60));
+        $minutes = floor(($remainingSeconds - ($days * 60 * 60 * 24) - ($hours * 60 * 60)) / 60);
+        $seconds = $remainingSeconds % 60;
+
+        // Buat array untuk data waktu yang akan dikirim ke JavaScript
+        $data = array(
+            "days" => $days,
+            "hours" => $hours,
+            "minutes" => $minutes,
+            "seconds" => $seconds
+        );
+
+        return $data;
+    }
 }

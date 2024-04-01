@@ -1,10 +1,17 @@
 <?php
 include 'connection.php';
+
+
 require 'function.php';
 
 session_start();
 if (!isset($_SESSION['username'])) {
     header('location: ../account/login.php');
+}
+
+
+if ($_SESSION['role'] != "admin") {
+    header("Location: ../index.php");
 }
 
 
@@ -53,7 +60,7 @@ if (isset($_POST['add_product'])) {
     //gunakan ini jika ingin data gambar diacak
     // if (move_uploaded_file($tmp_file, $storage)) {
     if (move_uploaded_file($tmp_file, $targetFile)) {
-        $product = new product(null, $image, $name, $description, $quantity, $price);
+        $product = new product(null, $image, $name, $description, $price);
         $product->addProduct();
     } else {
         echo "Gagal mengunggah gambar. Kode Kesalahan: " . $error;
@@ -61,6 +68,7 @@ if (isset($_POST['add_product'])) {
     }
 }
 
+// if edit button was clicked
 if (isset($_POST['edit_product'])) {
 
     $id = $_POST['id_product'];
@@ -73,68 +81,80 @@ if (isset($_POST['edit_product'])) {
     $image = $_FILES['image']['name'];
 
     //jika data image kosong
-    if(empty($image)) {
-        $query = new product($id, null, $name, $description, $quantity, $price);
+    if (empty($image)) {
+        $query = new product($id, null, $name, $description, $price);
         $query->editProduct();
     } else { //jika ada data dalam $image
-    $ukuran_file = $_FILES['image']['size'];
-    $error = $_FILES['image']['error'];
-    $tmp_file = $_FILES['image']['tmp_name'];
+        $ukuran_file = $_FILES['image']['size'];
+        $error = $_FILES['image']['error'];
+        $tmp_file = $_FILES['image']['tmp_name'];
 
-    // var_dump($image);
-    // exit;
-    if ($error === 4) {
-        echo "<script>alert('pilih gambar terlebih dahulu!');</script>";
-        header("Location: product.php");
-        return false;
+        // var_dump($image);
+        // exit;
+        if ($error === 4) {
+            echo "<script>alert('pilih gambar terlebih dahulu!');</script>";
+            header("Location: product.php");
+            return false;
+        }
+
+        $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
+        $ekstensiGambar = explode('.', $image);
+        $ekstensiGambar = strtolower(end($ekstensiGambar));
+
+        if (!in_array($ekstensiGambar, $ekstensiGambarValid)) {
+            echo "<script>alert('yang anda upload bukan gambar!');</script>";
+            header("Location: product.php");
+            return false;
+        }
+
+        if ($ukuran_file > 5242880) {
+            echo "<script>alert('ukuran terlalu besar!');</script>";
+            header("Location: product.php");
+            exit;
+        }
+
+        //jika pingin nama gambar di acak
+        // $newImage = uniqid() . '.' . $ekstensiGambar;
+        // $storage = '../data_image/' . $newImage;
+
+        //tanggal
+        $date = date("Y-m-d H:i:s");
+
+        //jika ingin nama gambar sama seperti yang diinput
+        $targetDir = '../data_image/';
+        $targetFile = $targetDir . basename($image);
+
+        // gunakan ini jika ingin data gambar diacak
+        // if (move_uploaded_file($tmp_file, $storage)) {
+        if (move_uploaded_file($tmp_file, $targetFile)) {
+            $query = new product($id, $image, $name, $description, $price);
+            $query->editProduct();
+        } else {
+            echo "Gagal mengunggah gambar. Kode Kesalahan: " . $error;
+            echo "<br><a href='product.php'>Kembali Ke Form</a>";
+        }
     }
-
-    $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
-    $ekstensiGambar = explode('.', $image);
-    $ekstensiGambar = strtolower(end($ekstensiGambar));
-
-    if (!in_array($ekstensiGambar, $ekstensiGambarValid)) {
-        echo "<script>alert('yang anda upload bukan gambar!');</script>";
-        header("Location: product.php");
-        return false;
-    }
-
-    if ($ukuran_file > 5242880) {
-        echo "<script>alert('ukuran terlalu besar!');</script>";
-        header("Location: product.php");
-        exit;
-    }
-
-    //jika pingin nama gambar di acak
-    // $newImage = uniqid() . '.' . $ekstensiGambar;
-    // $storage = '../data_image/' . $newImage;
-
-    //tanggal
-    $date = date("Y-m-d H:i:s");
-
-    //jika ingin nama gambar sama seperti yang diinput
-    $targetDir = '../data_image/';
-    $targetFile = $targetDir . basename($image);
-
-    // gunakan ini jika ingin data gambar diacak
-    // if (move_uploaded_file($tmp_file, $storage)) {
-    if (move_uploaded_file($tmp_file, $targetFile)) {
-        $query = new product($id, $image, $name, $description, $quantity, $price);
-        $query->editProduct();
-    } else {
-        echo "Gagal mengunggah gambar. Kode Kesalahan: " . $error;
-        echo "<br><a href='product.php'>Kembali Ke Form</a>";
-    }
-}
 }
 
 //delete product
 if (isset($_POST['delete_product'])) {
     $id = $_POST['id_product'];
 
-    $query = new product($id, null, null, null, null, null);
+    $query = new product($id, null, null, null, null);
     $query->deleteProduct();
 }
+
+// if(isset($_POST['auction_option'])) {
+//     $auction_time = $_POST['auction_time'];
+
+//     $query = new timer($auction_time);
+//     $query->time();
+
+//     $data = $query->time();
+
+//     header('Content-Type: application/json');
+//     echo json_encode($data);
+// }
 
 
 ?>
@@ -150,7 +170,7 @@ if (isset($_POST['delete_product'])) {
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Product</title>
+    <title>LelangIn | Admin-Product</title>
 
     <!-- Custom fonts for this template -->
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -159,7 +179,6 @@ if (isset($_POST['delete_product'])) {
     <!-- Custom styles for this template -->
     <link href="css/sb-admin-2.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-
 
     <!-- Custom styles for this page -->
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
@@ -198,7 +217,7 @@ if (isset($_POST['delete_product'])) {
                         <h1 class="h3 mb-2 text-gray-800">Product</h1>
                         <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
                             For more information about DataTables, please visit the <a target="_blank" href="https://datatables.net">official DataTables documentation</a>.</p>
-        
+
                         <!-- Button Add Product-->
                         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#productModal">
                             Add Product
@@ -268,10 +287,11 @@ if (isset($_POST['delete_product'])) {
                                                 <th>name</th>
                                                 <th>Description</th>
                                                 <th>price</th>
-                                                <th>Quantity</th>
-                                                <th>Time</th>
+                                                <th>date added</th>
+                                                <th>date closed</th>
                                                 <th>status</th>
                                                 <th>Option</th>
+                                                <th>Countdown</th>
                                             </tr>
                                         </thead>
                                         <tfoot>
@@ -281,10 +301,11 @@ if (isset($_POST['delete_product'])) {
                                                 <th>name</th>
                                                 <th>Description</th>
                                                 <th>price</th>
-                                                <th>Quantity</th>
                                                 <th>Date added</th>
+                                                <th>Date closed</th>
                                                 <th>status</th>
                                                 <th>Option</th>
+                                                <th>Countdown</th>
                                             </tr>
                                         </tfoot>
                                         <tbody>
@@ -300,10 +321,46 @@ if (isset($_POST['delete_product'])) {
                                                     <td><?= $rows['name']; ?></td>
                                                     <td><?= $rows['description']; ?></td>
                                                     <td><?= $rows['price']; ?></td>
-                                                    <td><?= $rows['quantity']; ?></td>
                                                     <td><?= $rows['date_added']; ?></td>
+                                                    <td><?= $rows['date_closed']; ?></td>
                                                     <td><?= $rows['status']; ?></td>
                                                     <td>
+                                                        <!-- Start the Auction -->
+                                                        <button type="button mb-5" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#product_data_<?php echo $rows['id_product']; ?>">
+                                                            Start Auction
+                                                        </button>
+
+                                                        <!-- Modal -->
+                                                        <div class="modal fade" id="product_data_<?php echo $rows['id_product']; ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="exampleModalLabel"><?php echo $rows['name']; ?></h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                            <div class="form-check">
+                                                                                <input class="form-check-input" type="radio" name="auction_time" id="auction_time" value="10m">
+                                                                                <label class="form-check-label" for="auction_time">
+                                                                                    10 minute
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="form-check">
+                                                                                <input class="form-check-input" type="radio" name="auction_time" id="auction_time" value="1d">
+                                                                                <label class="form-check-label" for="auction_time_1d">
+                                                                                    1 day
+                                                                                </label>
+                                                                            </div>
+                                                                            <div class="submit">
+                                                                                <button type="submit" name="auction_option" value="submit" class="btn btn-primary">Auction Time</button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- EDIT PRODUCT -->
                                                         <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#product_data_<?php echo $rows['id_product']; ?>">
                                                             Edit Product
                                                         </button>
@@ -321,8 +378,7 @@ if (isset($_POST['delete_product'])) {
 
                                                                             <div class="form-group">
                                                                                 <label for="image" class="form-label">Image</label>
-                                                                                <input type="file" name="image" id="image" accept=".jpg, .jpeg, .png" value="<?= $rows['image'];?>">
-                                                                                
+                                                                                <input type="file" name="image" id="image" accept=".jpg, .jpeg, .png" value="<?= $rows['image']; ?>">
                                                                             </div>
                                                                             <div class="form-group">
                                                                                 <label for="product_name">product name</label>
@@ -348,12 +404,14 @@ if (isset($_POST['delete_product'])) {
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                            <button type="submit" class="btn btn-danger" name="delete_product" id="delete_product">
-                                                                delete product
-                                                            </button>
+                                                        <!-- Delete -->
+                                                        <button type="submit" class="btn btn-danger" name="delete_product" id="delete_product">
+                                                            delete product
+                                                        </button>
                                                         </form>
-
-
+                                                    </td>
+                                                    <td>
+                                                        <p id="demo"></p>
                                                     </td>
                                                 </tr>
                                             <?php
@@ -369,8 +427,8 @@ if (isset($_POST['delete_product'])) {
             </div>
         </div>
     </div>
-    
-    
+
+
 
 
     </div>
@@ -386,6 +444,9 @@ if (isset($_POST['delete_product'])) {
 
     </div>
     <!-- End of Page Wrapper -->
+
+    <!-- Javascript file -->
+    <Script src="script.js"></Script>
 
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>

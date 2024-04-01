@@ -81,7 +81,7 @@ class account
 
         $password = $this->password;
 
-
+        session_start();
         // Cek jika user ditemukan
         if ($user = $result->fetch_assoc()) {
             // Verifikasi password
@@ -101,24 +101,16 @@ class account
                     echo "<script>
                         alert('LOGIN BERHASIL!');
                     </script>";
-
-                    //jika chcekbox bernilai 1;
-                    if ($this->checkbox == 1) {
-                        //buat cookie
-                        setcookie('id', $user['id_account'], time() + 600);
-                        setcookie('key', hash('sha256', $user['username']));
-                    }
-                    
-                    session_start(); // Memulai sesi 
+    
                     $_SESSION['username'] = $this->username;
                     header('Location: ../admin/index.php');
-                    exit(); // Menambahkan exit setelah header untuk menghentikan eksekusi script lebih lanjut
+                    exit();
 
                 } else if ($user['role'] == 'user') {
                     echo "<script>
                         alert('LOGIN BERHASIL!');
                     </script>";
-                    session_start(); // Memulai sesi 
+           
                     $_SESSION['username'] = $this->username;
                     header('Location: ../index.php');
                     exit(); // Menambahkan exit setelah header
@@ -186,14 +178,16 @@ class account
         $sql = $db->getConnection()->prepare("INSERT INTO tb_account (id_user, username, password, email) VALUES (?, ?, ?, ?)");
         $sql->bind_param("ssss", $newID, $this->username, $password_hash, $this->email);
         if ($sql->execute()) {
+            echo "<script>
+                alert('Pendaftaran berhasil!');
+            </script>";
             header('Location: login.php');
-            echo "<script>
-        alert('Pendaftaran berhasil!');
-        </script>";
+            exit;
         } else {
-            echo "<script>
-        alert('Terjadi kesalahan saat mendaftar.');
-        </script>";
+                echo "<script>
+            alert('Terjadi kesalahan saat mendaftar.');
+            </script>";
+            return false;
         }
     }
 
@@ -211,4 +205,16 @@ class account
 
         header('location: signup.php');
     }
+}
+
+class account_setting {
+    private $username,
+    $password;
+
+    public function __construct($username = "username", $password="password") 
+    {
+        $this->username = $username;
+        $this->password = $password;
+    }
+    
 }

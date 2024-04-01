@@ -3,6 +3,7 @@
 require 'function.php';
 
 session_start();
+
 if (!isset($_SESSION['username'])) {
    header('location: ../account/login.php');
 }
@@ -76,7 +77,7 @@ if ($auction_data == null) {
    <meta name="description" content="">
    <meta name="author" content="">
 
-   <title>LelangIn dulu</title>
+   <title>LelangIn | Auction</title>
 
    <!-- Custom fonts for this template-->
    <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -122,8 +123,10 @@ if ($auction_data == null) {
             </div>
             <div class="d-content">
                <h4 class="judul">
-                  Time
+                  Time Left
                </h4>
+               <p id="timer"></p>
+               <script src="../countdown.php"></script>
             </div>
          </div>
 
