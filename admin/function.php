@@ -156,50 +156,65 @@ class product
 
 class timer
 {   
-    private $duration;
+    private $id_product, $date, $hour, $minute, $second;
 
-    public function __construct($auctionTime)
+    public function __construct($id_product = null, $date = null, $hour = null, $minute= null, $second = null)
     {
-        // Menentukan durasi berdasarkan pilihan waktu lelang
-        switch ($auctionTime) {
-            case '10m':
-                $this->duration = '+10 minutes';
-                break;
-            case '1d':
-                $this->duration = '+1 day';
-                break;
-            default:
-                // Default ke 10 menit jika pilihan tidak dikenali
-                $this->duration = '+10 minutes';
-        }
+        $this->id_product = $id_product;
+        $this->date = $date;
+        $this->hour = $hour;
+        $this->minute = $minute;
+        $this->second = $second;
     }
 
     public function time()
     {
-        $timeZone = new DateTimeZone('Asia/Jakarta');
-        $endTime = new DateTime('now', $timeZone);
-        $endTime->modify($this->duration);
+        $db = new database();
+        $sql = $db->getConnection()->query("SELECT * FROM tb_countdown");
+        $data = $sql->fetch_assoc();
 
-        // Mengubah objek DateTime menjadi timestamp UNIX
-        $endTimeTimestamp = $endTime->getTimestamp();
+        // var_dump($this->date);
+        // var_dump($this->id_product);
+        // exit();
 
-        $currentTime = time();
-        $remainingSeconds = $endTimeTimestamp - $currentTime;
+        if(empty($data['id_product'])) {
 
-        // Calculate remaining time
-        $days = floor($remainingSeconds / (60 * 60 * 24));
-        $hours = floor(($remainingSeconds - ($days * 60 * 60 * 24)) / (60 * 60));
-        $minutes = floor(($remainingSeconds - ($days * 60 * 60 * 24) - ($hours * 60 * 60)) / 60);
-        $seconds = $remainingSeconds % 60;
+        $sql = "INSERT INTO `tb_countdown` (`id_product`, `date`, `hour`, `minute`, `second`) 
+                    VALUES (?,?,?,?,?)";
+        $query = $db->getConnection()->prepare($sql);      
+        $query->bind_param("sssss", $this->id_product, $this->date, $this->hour, $this->minute, $this->second);
+        $query->execute();
+        return $query;
 
-        // Buat array untuk data waktu yang akan dikirim ke JavaScript
-        $data = array(
-            "days" => $days,
-            "hours" => $hours,
-            "minutes" => $minutes,
-            "seconds" => $seconds
-        );
+        }
+        else {
+        $query = "UPDATE `tb_countdown` SET `id_product`=?, `date`= ?,
+                `hour`=?,`minute`=?,`second`=? WHERE id_product = ?";
+        $sql = $db->getConnection()->prepare($query);
+        $sql->bind_param("ssssss",$this->id_product, $this->date, $this->hour, $this->minute, $this->second, $this->id_product);
+        $sql->execute();
+        return $sql;
+        }
+    }
 
-        return $data;
+    public function showTime()
+    {
+        $db = new database();
+
+        $query = $db->getConnection()->query("SELECT * FROM tb_countdown ORDER BY id_product DESC 1");
+        $data = $query->fetch_assoc();
+
+        // if($data)
+        // {
+        //     $this->date = $data['date'];
+        //     $this->hour = $data['hour'];
+        //     $this->minute = $data['minute'];
+        //     $this->second = $data['second'];
+        // }
+        $result = [];
+        foreach($query as $data) {
+            $result[] = $data;
+        }
+        return $result;
     }
 }

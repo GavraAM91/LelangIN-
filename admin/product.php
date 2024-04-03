@@ -1,8 +1,23 @@
 <?php
-include 'connection.php';
+require 'connection.php';
+// require 'function.php';
 
+require 'timer.php';
 
-require 'function.php';
+$db = new database();
+
+//set time to asia jakarta
+date_default_timezone_set('Asia/Jakarta');
+
+$query = $db->getConnection()->query("SELECT * FROM tb_countdown ORDER BY id DESC LIMIT 1");
+$data = $query->fetch_assoc();
+
+$datetime = $data['date']. " " . $data['hour'] . ":" .$data['minute']. ":" . $data['second'];
+$datetime = strtotime($datetime);
+// $timestamp = strtotime($datetime);
+// var_dump($datetime);
+// var_dump($timestamp);
+// exit();
 
 session_start();
 if (!isset($_SESSION['username'])) {
@@ -144,18 +159,16 @@ if (isset($_POST['delete_product'])) {
     $query->deleteProduct();
 }
 
-// if(isset($_POST['auction_option'])) {
-//     $auction_time = $_POST['auction_time'];
+if(isset($_POST['auction_option'])) {
+    $id_product = $_POST['id_product'];
+    $date = $_POST['date'];
+    $hour = $_POST['hour'];
+    $minute = $_POST['minute'];
+    $second = $_POST['second'];
 
-//     $query = new timer($auction_time);
-//     $query->time();
-
-//     $data = $query->time();
-
-//     header('Content-Type: application/json');
-//     echo json_encode($data);
-// }
-
+    $query = new timer($id_product, $date, $hour, $minute, $second);
+    $query->time();
+}
 
 ?>
 
@@ -186,6 +199,35 @@ if (isset($_POST['delete_product'])) {
 </head>
 
 <body id="page-top">
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+     let countDownDate = <?= $datetime * 1000; ?>;
+     let now = <?= time() * 1000 ?> ;
+     console.log("Countdown Date: " + new Date(countDownDate));
+    console.log("Now: " + new Date(now));
+
+    const x = setInterval(function() {
+        //  var now = now + 1000;
+        const distance = countDownDate - now;
+        // if (distance >= 0) {
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            //display the result in the element with id = "demo"
+            document.getElementById("demo").innerHTML = days + "d " + hours + "h " +
+            minutes + "m " + seconds + "s ";
+        // } 
+
+        if(distance < 0) {
+            clearInterval(x);
+            document.getElementById("demo").innerHTML = "EXPIRED";
+        }
+    }, 1000);
+});
+</script>
 
     <!-- Page Wrapper -->
     <div id="wrapper">
@@ -338,7 +380,24 @@ if (isset($_POST['delete_product'])) {
                                                                         <h5 class="modal-title" id="exampleModalLabel"><?php echo $rows['name']; ?></h5>
                                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                     </div>
-                                                                    <div class="modal-body">
+                                                                    <form method="post" action="" enctype="multipart/form-data" id="CountdownForm">
+                                                                        <input type="hidden" name="id_product" id="id_product" value="<?= $rows['id_product']; ?>">
+
+                                                                        <div class="input-group mb-3">
+                                                                            <input type="hidden" name="id_product" value="<?= $rows['id_product'];?>">
+                                                                            <input type="date" class="form-control" name="date" id="date" placeholder="date">
+                                                                        </div>
+                                                                        <div class="input-group mb-3">
+                                                                            <input type="number" class="form-control" name="hour" id="hour" placeholder="hour">
+                                                                        </div>
+                                                                        <div class="input-group mb-3">
+                                                                            <input type="number" class="form-control" name="minute" id="minute" placeholder="minute">
+                                                                        </div>
+                                                                        <div class="input-group mb-3">
+                                                                            <input type="number" class="form-control" name="second" id="second" placeholder="second">
+                                                                        </div>
+
+                                                                        <!-- <div class="modal-body">
                                                                             <div class="form-check">
                                                                                 <input class="form-check-input" type="radio" name="auction_time" id="auction_time" value="10m">
                                                                                 <label class="form-check-label" for="auction_time">
@@ -350,82 +409,82 @@ if (isset($_POST['delete_product'])) {
                                                                                 <label class="form-check-label" for="auction_time_1d">
                                                                                     1 day
                                                                                 </label>
-                                                                            </div>
-                                                                            <div class="submit">
-                                                                                <button type="submit" name="auction_option" value="submit" class="btn btn-primary">Auction Time</button>
-                                                                            </div>
-                                                                        </form>
-                                                                    </div>
+                                                                            </div> -->
+                                                                        <div class="submit">
+                                                                            <button type="submit" name="auction_option" class="btn btn-primary">Auction Time</button>
+                                                                        </div>
+                                                                    </form>
                                                                 </div>
                                                             </div>
                                                         </div>
-
-                                                        <!-- EDIT PRODUCT -->
-                                                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#product_data_<?php echo $rows['id_product']; ?>">
-                                                            Edit Product
-                                                        </button>
-                                                        <!-- Modal -->
-                                                        <div class="modal fade" id="product_data_<?php echo $rows['id_product']; ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                                            <div class="modal-dialog">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h5 class="modal-title" id="exampleModalLabel"><?php echo $rows['name']; ?></h5>
-                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                        <form method="post" action="" enctype="multipart/form-data">
-                                                                            <input type="hidden" name="id_product" id="id_product" value="<?= $rows['id_product']; ?>">
-
-                                                                            <div class="form-group">
-                                                                                <label for="image" class="form-label">Image</label>
-                                                                                <input type="file" name="image" id="image" accept=".jpg, .jpeg, .png" value="<?= $rows['image']; ?>">
-                                                                            </div>
-                                                                            <div class="form-group">
-                                                                                <label for="product_name">product name</label>
-                                                                                <input type="text" class="form-control" id="product_name" name="product_name" placeholder="Enter product name" required value="<?= $rows['name']; ?>">
-                                                                            </div>
-                                                                            <div class="form-group">
-                                                                                <label for="description">description </label>
-                                                                                <input type="text" class="form-control" id="description" name="description" placeholder="Enter description" required value="<?= $rows['description']; ?>">
-                                                                            </div>
-                                                                            <div class="form-group">
-                                                                                <label for="price">Price </label>
-                                                                                <input type="text" class="form-control" id="price" name="price" placeholder="Enter price Rp." required value="<?= $rows['price']; ?>">
-                                                                            </div>
-                                                                            <div class="form-group">
-                                                                                <label for="quantity">Quantity </label>
-                                                                                <input type="text" class="form-control" id="quantity" name="quantity" placeholder=" quantity" required value="<?= $rows['quantity']; ?>">
-                                                                            </div>
-                                                                            <div class="submit">
-                                                                                <button type="submit" name="edit_product" class="btn btn-primary">Edit Product</button>
-                                                                            </div>
-                                                                        </form>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <!-- Delete -->
-                                                        <button type="submit" class="btn btn-danger" name="delete_product" id="delete_product">
-                                                            delete product
-                                                        </button>
-                                                        </form>
-                                                    </td>
-                                                    <td>
-                                                        <p id="demo"></p>
-                                                    </td>
-                                                </tr>
-                                            <?php
-                                            endwhile;
-                                            ?>
-                                        </tbody>
-                                    </table>
                                 </div>
+
+                                <!-- EDIT PRODUCT -->
+                                <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#product_data_<?php echo $rows['id_product']; ?>">
+                                    Edit Product
+                                </button>
+                                <!-- Modal -->
+                                <div class="modal fade" id="product_data_<?php echo $rows['id_product']; ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel"><?php echo $rows['name']; ?></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form method="post" action="" enctype="multipart/form-data">
+                                                    <input type="hidden" name="id_product" id="id_product" value="<?= $rows['id_product']; ?>">
+
+                                                    <div class="form-group">
+                                                        <label for="image" class="form-label">Image</label>
+                                                        <input type="file" name="image" id="image" accept=".jpg, .jpeg, .png" value="<?= $rows['image']; ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="product_name">product name</label>
+                                                        <input type="text" class="form-control" id="product_name" name="product_name" placeholder="Enter product name" required value="<?= $rows['name']; ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="description">description </label>
+                                                        <input type="text" class="form-control" id="description" name="description" placeholder="Enter description" required value="<?= $rows['description']; ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="price">Price </label>
+                                                        <input type="text" class="form-control" id="price" name="price" placeholder="Enter price Rp." required value="<?= $rows['price']; ?>">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="quantity">Quantity </label>
+                                                        <input type="text" class="form-control" id="quantity" name="quantity" placeholder=" quantity" required value="<?= $rows['quantity']; ?>">
+                                                    </div>
+                                                    <div class="submit">
+                                                        <button type="submit" name="edit_product" class="btn btn-primary">Edit Product</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Delete -->
+                                <button type="submit" class="btn btn-danger" name="delete_product" id="delete_product">
+                                    delete product
+                                </button>
+                                </form>
+                                </td>
+                                <td>
+                                    <p id="demo"></p>
+                                </td>
+                                </tr>
+                            <?php
+                                endwhile;
+                            ?>
+                            </tbody>
+                            </table>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
 
@@ -445,8 +504,9 @@ if (isset($_POST['delete_product'])) {
     </div>
     <!-- End of Page Wrapper -->
 
-    <!-- Javascript file -->
-    <Script src="script.js"></Script>
+    <!-- Javascript timezone file -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data-10-year-range.min.js"></script>
 
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
