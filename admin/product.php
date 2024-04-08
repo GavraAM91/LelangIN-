@@ -3,7 +3,6 @@ require 'connection.php';
 // require 'function.php';
 
 require 'timer.php';
-
 $db = new database();
 
 //set time to asia jakarta
@@ -12,7 +11,7 @@ date_default_timezone_set('Asia/Jakarta');
 $query = $db->getConnection()->query("SELECT * FROM tb_countdown ORDER BY id DESC LIMIT 1");
 $data = $query->fetch_assoc();
 
-$datetime = $data['date']. " " . $data['hour'] . ":" .$data['minute']. ":" . $data['second'];
+$datetime = $data['date'] . " " . $data['hour'] . ":" . $data['minute'] . ":" . $data['second'];
 $datetime = strtotime($datetime);
 // $timestamp = strtotime($datetime);
 // var_dump($datetime);
@@ -39,48 +38,9 @@ if (isset($_POST['add_product'])) {
 
     // Proses upload gambar
     $image = $_FILES['image']['name'];
-    $ukuran_file = $_FILES['image']['size'];
-    $error = $_FILES['image']['error'];
-    $tmp_file = $_FILES['image']['tmp_name'];
 
-    if ($error === 4) {
-        echo "<script>alert('pilih gambar terlebih dahulu!');</script>";
-        header("Location: product.php");
-        return false;
-    }
-
-    $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
-    $ekstensiGambar = explode('.', $image);
-    $ekstensiGambar = strtolower(end($ekstensiGambar));
-
-    if (!in_array($ekstensiGambar, $ekstensiGambarValid)) {
-        echo "<script>alert('yang anda upload bukan gambar!');</script>";
-        return false;
-    }
-
-    if ($ukuran_file > 5242880) {
-        echo "<script>alert('ukuran terlalu besar!');</script>";
-        header("Location: product.php");
-        exit;
-    }
-
-    //jika ingin data gambar diacak
-    // $newImage = uniqid() . '.' . $ekstensiGambar;
-    // $storage = '../data_image/' . $newImage;
-
-    // Jika ingin data gambar tetep sama dengan yang diinput
-    $targetDir = '../data_image/';
-    $targetFile = $targetDir . basename($image);
-
-    //gunakan ini jika ingin data gambar diacak
-    // if (move_uploaded_file($tmp_file, $storage)) {
-    if (move_uploaded_file($tmp_file, $targetFile)) {
-        $product = new product(null, $image, $name, $description, $price);
-        $product->addProduct();
-    } else {
-        echo "Gagal mengunggah gambar. Kode Kesalahan: " . $error;
-        echo "<br><a href='product.php'>Kembali Ke Form</a>";
-    }
+    $query = new product(null, $image, $name, $description, $price);
+    $query->addProduct();
 }
 
 // if edit button was clicked
@@ -90,8 +50,6 @@ if (isset($_POST['edit_product'])) {
     $name = $_POST['product_name'];
     $description = $_POST['description'];
     $price = $_POST['price'];
-    $quantity = $_POST['quantity'];
-
     // Proses upload gambar
     $image = $_FILES['image']['name'];
 
@@ -100,54 +58,8 @@ if (isset($_POST['edit_product'])) {
         $query = new product($id, null, $name, $description, $price);
         $query->editProduct();
     } else { //jika ada data dalam $image
-        $ukuran_file = $_FILES['image']['size'];
-        $error = $_FILES['image']['error'];
-        $tmp_file = $_FILES['image']['tmp_name'];
-
-        // var_dump($image);
-        // exit;
-        if ($error === 4) {
-            echo "<script>alert('pilih gambar terlebih dahulu!');</script>";
-            header("Location: product.php");
-            return false;
-        }
-
-        $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
-        $ekstensiGambar = explode('.', $image);
-        $ekstensiGambar = strtolower(end($ekstensiGambar));
-
-        if (!in_array($ekstensiGambar, $ekstensiGambarValid)) {
-            echo "<script>alert('yang anda upload bukan gambar!');</script>";
-            header("Location: product.php");
-            return false;
-        }
-
-        if ($ukuran_file > 5242880) {
-            echo "<script>alert('ukuran terlalu besar!');</script>";
-            header("Location: product.php");
-            exit;
-        }
-
-        //jika pingin nama gambar di acak
-        // $newImage = uniqid() . '.' . $ekstensiGambar;
-        // $storage = '../data_image/' . $newImage;
-
-        //tanggal
-        $date = date("Y-m-d H:i:s");
-
-        //jika ingin nama gambar sama seperti yang diinput
-        $targetDir = '../data_image/';
-        $targetFile = $targetDir . basename($image);
-
-        // gunakan ini jika ingin data gambar diacak
-        // if (move_uploaded_file($tmp_file, $storage)) {
-        if (move_uploaded_file($tmp_file, $targetFile)) {
-            $query = new product($id, $image, $name, $description, $price);
-            $query->editProduct();
-        } else {
-            echo "Gagal mengunggah gambar. Kode Kesalahan: " . $error;
-            echo "<br><a href='product.php'>Kembali Ke Form</a>";
-        }
+        $query = new product($id, $image, $name, $description, $price);
+        $query->editProduct();
     }
 }
 
@@ -159,7 +71,8 @@ if (isset($_POST['delete_product'])) {
     $query->deleteProduct();
 }
 
-if(isset($_POST['auction_option'])) {
+//input time into database
+if (isset($_POST['auction_option'])) {
     $id_product = $_POST['id_product'];
     $date = $_POST['date'];
     $hour = $_POST['hour'];
@@ -200,34 +113,60 @@ if(isset($_POST['auction_option'])) {
 
 <body id="page-top">
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-     let countDownDate = <?= $datetime * 1000; ?>;
-     let now = <?= time() * 1000 ?> ;
-     console.log("Countdown Date: " + new Date(countDownDate));
-    console.log("Now: " + new Date(now));
+    <script>
+        //receive data from form
+        document.addEventListener('DOMContentLoaded', function() {
+            let countDownDate = <?= $datetime * 1000; ?>;
+            let now = <?= time() * 1000 ?>;
+            console.log("Countdown Date: " + new Date(countDownDate));
+            console.log("Now: " + new Date(now));
 
-    const x = setInterval(function() {
-        //  var now = now + 1000;
-        const distance = countDownDate - now;
-        // if (distance >= 0) {
-            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            //display the result in the element with id = "demo"
-            document.getElementById("demo").innerHTML = days + "d " + hours + "h " +
-            minutes + "m " + seconds + "s ";
-        // } 
+            const x = setInterval(function() {
+                //  var now = now + 1000;
+                now = Date.now();
+                const distance = countDownDate - now;
+                // if (distance >= 0) {
+                var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        if(distance < 0) {
-            clearInterval(x);
-            document.getElementById("demo").innerHTML = "EXPIRED";
-        }
-    }, 1000);
-});
-</script>
+                //display the result in the element with id = "demo"
+                document.getElementById("demo").innerHTML = days + "d " + hours + "h " +
+                    minutes + "m " + seconds + "s ";
+                // } 
+
+                if (distance < 0) {
+                    clearInterval(x);
+                    document.getElementById("demo").innerHTML = "EXPIRED";
+                    sendDataToPHP();
+                }
+            }, 1000);
+        });
+
+            function sendDataToPHP() {
+
+                var id_product = document.getElementById("uniqueIdProduct").value;
+                console.log(id_product);
+
+                //send data to php 
+                fetch('ajax_timer.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `data=expired&id_product=${id_product}`,
+                    })
+                    .then(response => response.text())
+                    .then(result => {
+                        console.log(result);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+        </script>
 
     <!-- Page Wrapper -->
     <div id="wrapper">
@@ -294,10 +233,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 <div class="form-group">
                                                     <label for="price">Price </label>
                                                     <input type="text" class="form-control" id="price" name="price" placeholder="Enter price Rp." required>
-                                                </div>
-                                                <div class="form-group">
-                                                    <label for="quantity">Quantity </label>
-                                                    <input type="text" class="form-control" id="quantity" name="quantity" placeholder=" quantity" required>
                                                 </div>
                                                 <div class="submit">
                                                     <button type="submit" name="add_product" class="btn btn-primary">Add Product</button>
@@ -368,23 +303,22 @@ document.addEventListener('DOMContentLoaded', function() {
                                                     <td><?= $rows['status']; ?></td>
                                                     <td>
                                                         <!-- Start the Auction -->
-                                                        <button type="button mb-5" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#product_data_<?php echo $rows['id_product']; ?>">
+                                                        <button type="button mb-5" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#product_timer_<?php echo $rows['id_product']; ?>">
                                                             Start Auction
                                                         </button>
 
                                                         <!-- Modal -->
-                                                        <div class="modal fade" id="product_data_<?php echo $rows['id_product']; ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                        <div class="modal fade" id="product_timer_<?php echo $rows['id_product']; ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                             <div class="modal-dialog">
                                                                 <div class="modal-content">
                                                                     <div class="modal-header">
                                                                         <h5 class="modal-title" id="exampleModalLabel"><?php echo $rows['name']; ?></h5>
                                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                     </div>
-                                                                    <form method="post" action="" enctype="multipart/form-data" id="CountdownForm">
-                                                                        <input type="hidden" name="id_product" id="id_product" value="<?= $rows['id_product']; ?>">
-
+                                                                    <form method="post" action="" enctype="multipart/form-data" id="input_id">
+                                                                        <input type="hidden" name="id_product" id="uniqueIdProduct" value="<?= $rows['id_product']; ?>">
                                                                         <div class="input-group mb-3">
-                                                                            <input type="hidden" name="id_product" value="<?= $rows['id_product'];?>">
+                                                                            <input type="hidden" name="id_product" value="<?= $rows['id_product']; ?>">
                                                                             <input type="date" class="form-control" name="date" id="date" placeholder="date">
                                                                         </div>
                                                                         <div class="input-group mb-3">
@@ -396,20 +330,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                                                         <div class="input-group mb-3">
                                                                             <input type="number" class="form-control" name="second" id="second" placeholder="second">
                                                                         </div>
-
-                                                                        <!-- <div class="modal-body">
-                                                                            <div class="form-check">
-                                                                                <input class="form-check-input" type="radio" name="auction_time" id="auction_time" value="10m">
-                                                                                <label class="form-check-label" for="auction_time">
-                                                                                    10 minute
-                                                                                </label>
-                                                                            </div>
-                                                                            <div class="form-check">
-                                                                                <input class="form-check-input" type="radio" name="auction_time" id="auction_time" value="1d">
-                                                                                <label class="form-check-label" for="auction_time_1d">
-                                                                                    1 day
-                                                                                </label>
-                                                                            </div> -->
                                                                         <div class="submit">
                                                                             <button type="submit" name="auction_option" class="btn btn-primary">Auction Time</button>
                                                                         </div>
@@ -464,17 +384,23 @@ document.addEventListener('DOMContentLoaded', function() {
                                     </div>
                                 </div>
                                 <!-- Delete -->
-                                <button type="submit" class="btn btn-danger" name="delete_product" id="delete_product">
-                                    delete product
-                                </button>
+                                <form action="" method="POST">
+                                    <input type="hidden" value="<?= $rows['id_product']; ?>" name="id_product">
+                                    <button type="submit" class="btn btn-danger" name="delete_product" id="delete_product">
+                                        delete product
+                                    </button>
                                 </form>
                                 </td>
                                 <td>
-                                    <p id="demo"></p>
+                                    <?php 
+                                        $query = "SELECT tb_product.id_product AS product_id, tb_countdown.id_product AS countdown_id 
+                                                FROM tb_product INNER JOIN tb_countdown ON tb_product.id_product = tb_countdown.id_product";
+                                    ?>
+                                        <p id="demo"></p>
                                 </td>
                                 </tr>
                             <?php
-                                endwhile;
+                                            endwhile;
                             ?>
                             </tbody>
                             </table>

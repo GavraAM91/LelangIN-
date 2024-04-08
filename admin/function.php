@@ -55,7 +55,7 @@ class database
 
 class product
 {
-    private $id, $image, $name, $description, $quantity, $price;
+    private $id, $image, $name, $description,$price;
 
     //construct
     public function __construct($id = "id", $image = "image", $name = "name", $description = "description", $price = "price")
@@ -72,32 +72,119 @@ class product
     {
         $db = new database();
         $lastIDFromDB = $db->getLastProductID(); // Dapatkan lastID dari database
-
         $generator = new IDGenerator($lastIDFromDB); // Inisialisasi IDGenerator dengan lastID
         $newID = $generator->generateID(); // Generate ID baru
 
-        $sql = $db->getConnection()->prepare("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`,`price`)  
-            VALUES (?,?,?,?,?,?,?)");
+        $ukuran_file = $_FILES['image']['size'];
+        $error = $_FILES['image']['error'];
+        $tmp_file = $_FILES['image']['tmp_name'];
 
-        $sql->bind_param('sssssss', $newID, $this->image, $this->name, $this->description, $this->price,);
-
-        // $sql = $db->getConnection()->query("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`, `quantity`, `price`,`date_added`)  
-        //     VALUES ('$newID', '$this->image', '$this->name', '$this->description', '$this->quantity', '$this->price', '$date')");
-        if ($sql->execute()) {
-            echo "<script>
-                    alert('input product berhasil!');
-                    </script>";
-            header('Location: product.php');
-        } else {
-            echo "<script>
-                    alert('Terjadi kesalahan input product');
-                </script>";
+        if ($error === 4) {
+            echo "<script>alert('pilih gambar terlebih dahulu!');</script>";
+            header("Location: product.php");
+            return false;
         }
+
+        $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
+        $ekstensiGambar = explode('.', $this->image);
+        $ekstensiGambar = strtolower(end($ekstensiGambar));
+
+        if (!in_array($ekstensiGambar, $ekstensiGambarValid)) {
+            echo "<script>alert('yang anda upload bukan gambar!');</script>";
+            return false;
+        }
+
+        if ($ukuran_file > 5242880) {
+            echo "<script>alert('ukuran terlalu besar!');</script>";
+            header("Location: product.php");
+            exit;
+        }
+
+        //jika ingin data gambar diacak
+        // $newImage = uniqid() . '.' . $ekstensiGambar;
+        // $storage = '../data_image/' . $newImage;
+
+        // Jika ingin data gambar tetep sama dengan yang diinput
+        $targetDir = '../data_image/';
+        $targetFile = $targetDir . basename($this->image);
+
+        // if (move_uploaded_file($tmp_file, $storage)) {s
+        if (move_uploaded_file($tmp_file, $targetFile)) {
+            echo "<script>
+                alert('data berhasil ditambahkan!';
+            </script>";
+
+            $sql = $db->getConnection()->prepare("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`,`price`)  
+                VALUES (?,?,?,?,?)");
+
+            $sql->bind_param('sssss', $newID, $this->image, $this->name, $this->description, $this->price,);
+
+            // $sql = $db->getConnection()->query("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`, `quantity`, `price`,`date_added`)  
+            //     VALUES ('$newID', '$this->image', '$this->name', '$this->description', '$this->quantity', '$this->price', '$date')");
+            if ($sql->execute()) {
+                echo "<script>
+                        alert('input product berhasil!');
+                        </scrxipt>";
+                header('Location: product.php');
+            } else {
+                echo "<script>
+                        alert('Terjadi kesalahan input product');
+                    </script>";
+                header("Location: product.php");
+            }
+        } 
+
     }
 
     public function editProduct()
     {
         $db = new database();
+
+        $ukuran_file = $_FILES['image']['size'];
+        $error = $_FILES['image']['error'];
+        $tmp_file = $_FILES['image']['tmp_name'];
+
+        // var_dump($image);
+        // exit;
+        if ($error === 4) {
+            echo "<script>alert('pilih gambar terlebih dahulu!');</script>";
+            header("Location: product.php");
+            return false;
+        }
+
+        $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
+        $ekstensiGambar = explode('.', $this->image);
+        $ekstensiGambar = strtolower(end($ekstensiGambar));
+
+        if (!in_array($ekstensiGambar, $ekstensiGambarValid)) {
+            echo "<script>alert('yang anda upload bukan gambar!');</script>";
+            header("Location: product.php");
+            return false;
+        }
+
+        if ($ukuran_file > 5242880) {
+            echo "<script>alert('ukuran terlalu besar!');</script>";
+            header("Location: product.php");
+            exit;
+        }
+
+        //jika pingin nama gambar di acak
+        // $newImage = uniqid() . '.' . $ekstensiGambar;
+        // $storage = '../data_image/' . $newImage;
+
+        //jika ingin nama gambar sama seperti yang diinput
+        $targetDir = '../data_image/';
+        $targetFile = $targetDir . basename($this->image);
+
+        // gunakan ini jika ingin data gambar diacak
+        // if (move_uploaded_file($tmp_file, $storage)) {
+        if (move_uploaded_file($tmp_file, $targetFile)) {
+            echo "<script>
+               </script>";
+        } else {
+            echo "Gagal mengunggah gambar. Kode Kesalahan: " . $error;
+            echo "<br><a href='product.php'>Kembali Ke Form</a>";
+        }
 
         //for time 
         date_default_timezone_set("Asia/Jakarta");
@@ -111,7 +198,7 @@ class product
             //jika image berisi
             //update data
             $sql = $db->getConnection()->prepare("UPDATE `tb_product` SET `image`=?,`name`=?,`description`=?,`price`=? WHERE id_product=? ");
-            $sql->bind_param('sssssss', $this->image, $this->name, $this->description, $this->price, $this->id);
+            $sql->bind_param('sssss', $this->image, $this->name, $this->description, $this->price, $this->id);
         }
         // $sql = $db->getConnection()->query("UPDATE `tb_product` SET `image`='$this->image',`name`='$this->name',`description`='$this->description',
         //         `quantity`='$this->quantity',`price`='$this->price',`date_added`='$date' WHERE id_product='$this->id'");
@@ -155,10 +242,10 @@ class product
 }
 
 class timer
-{   
+{
     private $id_product, $date, $hour, $minute, $second;
 
-    public function __construct($id_product = null, $date = null, $hour = null, $minute= null, $second = null)
+    public function __construct($id_product = null, $date = null, $hour = null, $minute = null, $second = null)
     {
         $this->id_product = $id_product;
         $this->date = $date;
@@ -177,26 +264,24 @@ class timer
         // var_dump($this->id_product);
         // exit();
 
-        if(empty($data['id_product'])) {
+        if (!isset($data['id_product'])) {
 
-        $sql = "INSERT INTO `tb_countdown` (`id_product`, `date`, `hour`, `minute`, `second`) 
+            $sql = "INSERT INTO `tb_countdown` (`id_product`, `date`, `hour`, `minute`, `second`) 
                     VALUES (?,?,?,?,?)";
-        $query = $db->getConnection()->prepare($sql);      
-        $query->bind_param("sssss", $this->id_product, $this->date, $this->hour, $this->minute, $this->second);
-        $query->execute();
-        return $query;
+            $query = $db->getConnection()->prepare($sql);
+            $query->bind_param("sssss", $this->id_product, $this->date, $this->hour, $this->minute, $this->second);
+            $query->execute();
+            return $query;
 
-        }
-        else {
-        $query = "UPDATE `tb_countdown` SET `id_product`=?, `date`= ?,
+        } else {
+            $query = "UPDATE `tb_countdown` SET `id_product`=?, `date`= ?,
                 `hour`=?,`minute`=?,`second`=? WHERE id_product = ?";
-        $sql = $db->getConnection()->prepare($query);
-        $sql->bind_param("ssssss",$this->id_product, $this->date, $this->hour, $this->minute, $this->second, $this->id_product);
-        $sql->execute();
-        return $sql;
+            $sql = $db->getConnection()->prepare($query);
+            $sql->bind_param("ssssss", $this->id_product, $this->date, $this->hour, $this->minute, $this->second, $this->id_product);
+            $sql->execute();
+            return $sql;
         }
     }
-
     public function showTime()
     {
         $db = new database();
@@ -212,7 +297,7 @@ class timer
         //     $this->second = $data['second'];
         // }
         $result = [];
-        foreach($query as $data) {
+        foreach ($query as $data) {
             $result[] = $data;
         }
         return $result;

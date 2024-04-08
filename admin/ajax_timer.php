@@ -1,26 +1,31 @@
-<?php 
+<?php
 
-// ajax_timer.php
-require 'function.php';
+include 'function.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auction_time'])) {
-    $auction_time = $_POST['auction_time'];
-    
-    $timer = new timer($auction_time);
+$db = new database();
 
-    $data = $timer->time(); // Sekarang $data berisi array yang dikembalikan oleh time()
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (isset($_POST['data']) && isset($_POST['id_product'])) {
 
-     // Menambahkan data ke file JSON
-     $fileJson = 'data.json';
-     $existingData = json_decode(file_get_contents($fileJson), true) ?: [];
-     $existingData[] = $data;
-     file_put_contents($fileJson, json_encode($existingData, JSON_PRETTY_PRINT));
- 
-     header('Content-Type: application/json');
-     json_encode($data); 
-     header("Location: product.php");
+        $data = $_POST['data'];
+        $id_product = $_POST['id_product'];
 
-} else {
-    http_response_code(400);
-    echo json_encode(['error' => 'Bad Request']);
+        var_dump($id_product);
+
+        //mengambil data tanggal close
+        date_default_timezone_set("Asia/Jakarta");
+        $date_clossed = date("Y-m-d h-m-s");
+
+        $query = $db->getConnection()->prepare("UPDATE `tb_product` SET `status`=?,`date_closed`=? WHERE `id_product` = ?");
+        $query->bind_param("sss", $data, $date_clossed,$id_product);
+        $query->execute();
+
+        if ($query) {
+            echo "<script>
+            alert('data berhasil ditambahkan');
+        </script>";
+        } else {
+            echo "Error: " . $sql . "<br>";
+        }
+    }
 }
