@@ -91,7 +91,8 @@ class account
                     //buat cookie
                     setcookie('id', $user['id_account'], time() + 600);
                     setcookie('key', hash('sha256', $user['username']));
-                }
+                } 
+                
                 // Password benar, login berhasil
                 $_SESSION['role'] = $user['role'];
 

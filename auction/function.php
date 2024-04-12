@@ -70,4 +70,68 @@ class auction
     }
 } 
 
+class address {
+    private $id_user,
+    $desa,
+    $kecamatan, 
+    $kota,
+    $provinsi,
+    $negara;
 
+    public function __construct ($id_user = "id_user", $desa = "desa", $kecamatan = "kecamatan", $kota = "kota", $provinsi = "provinsi", $negara = "negara") {
+        $this->id_user = $id_user;
+        $this->desa = $desa;
+        $this->kecamatan = $kecamatan;
+        $this->kota = $kota;
+        $this->provinsi = $provinsi;
+        $this->negara = $negara;
+    }
+
+    public function addAddress() {
+        //open database or make new database class
+        $db = new database();
+
+        //make query insert into database
+        $sql = "INSERT INTO `tb_address`(`id_user`, `desa`, `kecamatan`, `kabupaten/kota`, `provinsi`, `negara`) 
+                VALUES (?,?,?,?,?,?)";
+        $query = $db->getConnection()->prepare($sql);
+        $query->bind_param("ssssss", $this->id_user, $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara);
+        $query->execute();
+
+        if($query) {
+            echo "<script>
+                alert('data alamat berhasil ditambahkan');
+            </script>";
+            header("Location: ../index.php");
+        } else {
+            echo "<script>
+                alert('data alamat berhasil ditambahkan');
+            </script>";
+            header("Location: ../index.php");
+        }
+    }
+
+    public function editAdress() {
+        //open database
+        $db = new database();
+
+        //make query update into database
+        $sql = "UPDATE `tb_address` SET `id_user`=?,`desa`=?,`kecamatan`=?,`kabupaten/kota`=?,`provinsi`=?,`negara`=? WHERE `id_user`=?";
+        $query = $db->getConnection()->prepare($sql);
+        $query->bind_param("sssssss", $this->id_user, $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara, $this->id_user);
+        $query->execute();
+
+        if($query) {
+            echo "<script>
+                alert('data alamat berhasil ditambahkan');
+            </script>";
+            header("Location: ../index.php");
+        } else {
+            echo "<script>
+                alert('data alamat berhasil ditambahkan');
+            </script>";
+            header("Location: ../index.php");
+        }
+    }
+}
+    

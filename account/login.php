@@ -21,16 +21,16 @@ if (isset($_COOKIE['id']) && isset($_COOKIE['key'])) {
 if (isset($_POST["submit"])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
+    $checkbox = $_POST['checkbox'];
 
-    if (isset($_POST['remember'])) {
-        $checkbox = 1;
-        $user = new account($username, $password, $checkbox);
-        $user->login();
-    } else {
+    if(!isset($_POST['remember'])) {
         echo "<script>
             alert('Cookie belum dicentang');
-        </script";
-        header("Location: login.php");
+        </script>";
+    } else { 
+        //input kedalam variable
+        $user = new account($username, $password, null, null, $checkbox);
+        $user->login();
     }
 }
 
@@ -71,7 +71,7 @@ if (isset($_POST["submit"])) {
                     </div>
                     <div class=""></div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="remember" id="remember" value="" id="flexCheckDefault">
+                        <input class="form-check-input" type="checkbox" name="remember" id="remember" value=1 id="flexCheckDefault">
                         <label class="form-check-label" for="flexCheckDefault">
                             Activate Cookie
                         </label>

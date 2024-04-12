@@ -55,7 +55,7 @@ class database
 
 class product
 {
-    private $id, $image, $name, $description,$price;
+    private $id, $image, $name, $description, $price;
 
     //construct
     public function __construct($id = "id", $image = "image", $name = "name", $description = "description", $price = "price")
@@ -132,8 +132,7 @@ class product
                     </script>";
                 header("Location: product.php");
             }
-        } 
-
+        }
     }
 
     public function editProduct()
@@ -257,29 +256,37 @@ class timer
     public function time()
     {
         $db = new database();
-        $sql = $db->getConnection()->query("SELECT * FROM tb_countdown");
-        $data = $sql->fetch_assoc();
+        $sql = $db->getConnection()->prepare("SELECT * FROM tb_countdown WHERE id_product = ?");
+        $sql->bind_param("s", $this->id_product);
+        $sql->execute();
+        $data = $sql->get_result();
 
-        // var_dump($this->date);
-        // var_dump($this->id_product);
-        // exit();
 
-        if (!isset($data['id_product'])) {
+        if ($data->num_rows == 0 ) {
 
             $sql = "INSERT INTO `tb_countdown` (`id_product`, `date`, `hour`, `minute`, `second`) 
                     VALUES (?,?,?,?,?)";
             $query = $db->getConnection()->prepare($sql);
             $query->bind_param("sssss", $this->id_product, $this->date, $this->hour, $this->minute, $this->second);
-            $query->execute();
-            return $query;
 
+            if ($query->execute()) {
+                echo "<script>
+                alert('Tambah Countdown berhasil!');
+            </script>";
+                header("Location: product.php");
+            }
         } else {
             $query = "UPDATE `tb_countdown` SET `id_product`=?, `date`= ?,
                 `hour`=?,`minute`=?,`second`=? WHERE id_product = ?";
             $sql = $db->getConnection()->prepare($query);
             $sql->bind_param("ssssss", $this->id_product, $this->date, $this->hour, $this->minute, $this->second, $this->id_product);
             $sql->execute();
-            return $sql;
+            if ($query) {
+                echo "<script>
+                alert('Update countdown berhasil!');
+            </script>";
+                header("Location: product.php");
+            }
         }
     }
     public function showTime()

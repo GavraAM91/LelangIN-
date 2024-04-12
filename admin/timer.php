@@ -1,42 +1,72 @@
-<?php 
+<?php
 
 include 'function.php';
 
-// $obj = new timer;
-// $data = $obj->showTime();    
-
-// $dateString = $row['date'] . ' ' . $row['hour'] . ':' . $row['minute'] . ':' . $row['second'];
-
 $db = new database();
+
+//set time to asia jakarta
+date_default_timezone_set('Asia/Jakarta');
 
 $query = $db->getConnection()->query("SELECT * FROM tb_countdown ORDER BY id DESC LIMIT 1");
 $data = $query->fetch_assoc();
 
+if ($data !== null) {
+    $datetime = $data['date'] . " " . $data['hour'] . ":" . $data['minute'] . ":" . $data['second'];
+    $datetime = strtotime($datetime);
+}
 ?>
 
 <script>
+    //receive data from form
+    document.addEventListener('DOMContentLoaded', function() {
+        let countDownDate = <?= $datetime * 1000; ?>;
+        let now = <?= time() * 1000 ?>;
+        console.log("Countdown Date: " + new Date(countDownDate));
+        console.log("Now: " + new Date(now));
 
- var countDownDate = <?= strtotime($data['date'] . "-" . $data['hour'] . ":" . $data['minute'] . ":" . $data['second'] ) * 1000 ;?>;
- document.addEventListener('DOMContentLoaded', function() {
-    var now = <?= time() ?> * 1000;
 
-    // Update the countdown every 1 second
-    var x = setInterval(function() {
-        now = now + 1000;
-        var distance = countDownDate - now;
+        const x = setInterval(function() {
+            //  var now = now + 1000;
+            now = Date.now();
+            const distance = countDownDate - now;
+            // if (distance >= 0) {
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            //display the result in the element with id = "demo"
+            document.getElementById("demo").innerHTML = days + "d " + hours + "h " +
+                minutes + "m " + seconds + "s ";
+            // } 
 
-        document.getElementById("demo").innerHTML = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("demo").innerHTML = "EXPIRED";
+                sendDataToPHP();
+            }
+        }, 1000);
+    });
 
-        if (distance < 0) {
-            clearInterval(x);
-            document.getElementById("demo").innerHTML = "EXPIRED";
-        }
-    }, 1000);
-});
+    function sendDataToPHP() {
 
+        var id_product = document.getElementById("uniqueIdProduct").value;
+        console.log(id_product);
+
+        //send data to php 
+        fetch('ajax_timer.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `data=expired&id_product=${id_product}`,
+            })
+            .then(response => response.text())
+            .then(result => {
+                console.log(result);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
 </script>
