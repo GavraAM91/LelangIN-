@@ -1,6 +1,6 @@
 <?php
 
-require 'function.php';
+require '../timer/timer.php';
 
 session_start();
 
@@ -65,7 +65,9 @@ if (isset($_POST['add_bid'])) {
 
 if ($auction_data == null) {
    $auction_data['price'] = 0;
+   $auction_data['username'] = "no user";
 }
+
 ?>
 
 <html>
@@ -118,34 +120,57 @@ if ($auction_data == null) {
                   <?= $auction_data['price']; ?>
                </p>
                <p style="color : #fb8500">
-                  <?= $auction_data['username'] ?>
+                  <?= $auction_data['username']; ?>
                </p>
             </div>
             <div class="d-content">
                <h4 class="judul">
                   Time Left
                </h4>
-               <p id="timer"></p>
-               <script src="../countdown.php"></script>
+               <?php
+                  if($data['status'] == "open") {
+               ?>
+               <p id="demo"></p>
+               <?php } else if($data['status'] == "expired") { ?>
+                  <p><?= $data['status'];?></p>
+               <?php } ?>
             </div>
          </div>
 
          <hr>
-
-         <div class="auction-data">
-            <div class="d-content">
-               <form action="" method="POST">
-                  <h4 class="judul">Current Bid</h4>
-                  <div class="input-group mb-3">
-                     <span class="input-group-text">Rp.</span>
-                     <input type="text" class="form-control" name="ammount_bid" placeholder="<?= $data['price'] ?>">
-                     <input type="hidden" name="id_product" id="id_product" value="<?= $data['id_product']; ?> ">
-                     <input type="hidden" name="id_user" id="id_user" value="<?= $sql['id_user']; ?>">
-                     <button type="submit" class="btn btn-outline-primary" name="add_bid">Add Bid</button>
-                  </div>
-               </form>
+         <?php
+         if ($data['status'] == "open") {
+         ?>
+            <div class="auction-data">
+               <div class="d-content">
+                  <form action="" method="POST">
+                     <h4 class="judul">Current Bid</h4>
+                     <div class="input-group mb-3">
+                        <span class="input-group-text">Rp.</span>
+                        <input type="text" class="form-control" name="ammount_bid" placeholder="<?= $data['price'] ?>">
+                        <input type="hidden" name="id_product" id="id_product" value="<?= $data['id_product']; ?> ">
+                        <input type="hidden" name="id_user" id="id_user" value="<?= $sql['id_user']; ?>">
+                        <button type="submit" class="btn btn-outline-primary" name="add_bid">Add Bid</button>
+                     </div>
+                  </form>
+               </div>
             </div>
-         </div>
+         <?php  } else if($data['status'] = "expired") { ?>
+            <div class="auction-data">
+               <div class="d-content">
+                  <form action="" method="POST">
+                     <h4 class="judul">Current Bid</h4>
+                     <div class="input-group mb-3">
+                        <span class="input-group-text">Rp.</span>
+                        <input type="text" class="form-control" name="ammount_bid" placeholder="<?= $data['price'] ?>" disabled>
+                        <input type="hidden" name="id_product" id="id_product" value="<?= $data['id_product']; ?> ">
+                        <input type="hidden" name="id_user" id="id_user" value="<?= $sql['id_user']; ?>">
+                        <button type="submit" class="btn btn-outline-primary" name="add_bid" disabled>Add Bid</button>
+                     </div>
+                  </form>
+               </div>
+            </div>
+         <?php } ?>
       </div>
       <hr>
 </body>

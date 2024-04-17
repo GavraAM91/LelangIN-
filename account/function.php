@@ -56,10 +56,11 @@ class database
 
 class account
 {
-    private $username, $password, $email, $confirmPassword,$checkbox;
+    private $image, $username, $password, $confirmPassword, $email,$checkbox;
 
-    public function __construct($username = "username", $password = "password", $confirmPassword = "confirmPassword", $email = "email", $checkbox = "checkbox")
+    public function __construct($image = "image", $username = "username", $password = "password", $confirmPassword = "confirmPassword", $email = "email", $checkbox = "checkbox")
     {
+        $this->image = $image;
         $this->username = $username;
         $this->password = $password;
         $this->confirmPassword = $confirmPassword;
@@ -91,8 +92,8 @@ class account
                     //buat cookie
                     setcookie('id', $user['id_account'], time() + 600);
                     setcookie('key', hash('sha256', $user['username']));
-                } 
-                
+                }
+
                 // Password benar, login berhasil
                 $_SESSION['role'] = $user['role'];
 
@@ -102,16 +103,15 @@ class account
                     echo "<script>
                         alert('LOGIN BERHASIL!');
                     </script>";
-    
+
                     $_SESSION['username'] = $this->username;
                     header('Location: ../admin/index.php');
                     exit();
-
                 } else if ($user['role'] == 'user') {
                     echo "<script>
                         alert('LOGIN BERHASIL!');
                     </script>";
-           
+
                     $_SESSION['username'] = $this->username;
                     header('Location: ../index.php');
                     exit(); // Menambahkan exit setelah header
@@ -175,20 +175,59 @@ class account
         // Hash password
         $password_hash = password_hash($this->password, PASSWORD_DEFAULT);
 
-        // Menambahkan ke database
-        $sql = $db->getConnection()->prepare("INSERT INTO tb_account (id_user, username, password, email) VALUES (?, ?, ?, ?)");
-        $sql->bind_param("ssss", $newID, $this->username, $password_hash, $this->email);
-        if ($sql->execute()) {
-            echo "<script>
-                alert('Pendaftaran berhasil!');
-            </script>";
-            header('Location: login.php');
+        $ukuran_file = $_FILES['image']['size'];
+        $error = $_FILES['image']['error'];
+        $tmp_file = $_FILES['image']['tmp_name'];
+
+        if ($error === 4) {
+            echo "<script>alert('pilih gambar terlebih dahulu!');</script>";
+            header("Location: signup.php");
+            return false;
+        }
+
+        $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
+        $ekstensiGambar = explode('.', $this->image);
+        $ekstensiGambar = strtolower(end($ekstensiGambar));
+
+        if (!in_array($ekstensiGambar, $ekstensiGambarValid)) {
+            echo "<script>alert('yang anda upload bukan gambar!');</script>";
+            return false;
+        }
+
+        if ($ukuran_file > 5242880) {
+            echo "<script>alert('ukuran terlalu besar!');</script>";
+            header("Location: product.php");
             exit;
-        } else {
+        }
+        //jika ingin data gambar diacak
+        // $newImage = uniqid() . '.' . $ekstensiGambar;
+        // $storage = '../data_image/' . $newImage;
+
+        // Jika ingin data gambar tetep sama dengan yang diinput
+        $targetDir = '../profile_image/';
+        $targetFile = $targetDir . basename($this->image);
+
+        // if (move_uploaded_file($tmp_file, $storage)) {s
+        if (move_uploaded_file($tmp_file, $targetFile)) {
+            echo "<script>
+                alert('data berhasil ditambahkan!';
+            </script>";
+
+            $sql = $db->getConnection()->prepare("INSERT INTO tb_account (id_user, image, username, password, email) VALUES (?, ?, ?, ?, ?)");
+            $sql->bind_param("sssss", $newID, $this->image, $this->username, $password_hash, $this->email);
+            // Menambahkan ke database
+            if ($sql->execute()) {
+                header('Location: login.php');
+                echo "<script>
+                alert('Pendaftaran berhasil!');
+                </script>";
+                exit;
+            } else {
                 echo "<script>
             alert('Terjadi kesalahan saat mendaftar.');
             </script>";
-            return false;
+                return false;
+            }
         }
     }
 
@@ -208,14 +247,14 @@ class account
     }
 }
 
-class account_setting {
+class account_setting
+{
     private $username,
-    $password;
+        $password;
 
-    public function __construct($username = "username", $password="password") 
+    public function __construct($username = "username", $password = "password")
     {
         $this->username = $username;
         $this->password = $password;
     }
-    
 }

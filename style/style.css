@@ -125,3 +125,15 @@ button {
     background-color: yellow;
 }
 
+.second-section {
+    padding: 50px 20px 50px 20px;
+    margin-left: 50px;
+}
+
+.second-section .header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #000;
+    font-weight: bolder;
+}

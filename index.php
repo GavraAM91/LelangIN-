@@ -31,8 +31,8 @@ require 'database/database.php';
 
 <body>
    <!-- apply header -->
-   <?php 
-      require_once 'components/header.php';
+   <?php
+   require_once 'components/header.php';
    ?>
 
    <div class="hero-section">
@@ -64,7 +64,7 @@ require 'database/database.php';
                $auction_data = $query->fetch_assoc();
 
                //query shows data from tb_product
-               $sql = $db->getConnection()->query("SELECT * FROM `tb_product`");
+               $sql = $db->getConnection()->query("SELECT * FROM `tb_product` WHERE `status`='open'");
                if (mysqli_num_rows($sql) > 0) {
                   while ($fetch_product = mysqli_fetch_assoc($sql)) {
 
@@ -82,16 +82,16 @@ require 'database/database.php';
                               <div class="col-md-8">
                                  <div class="card-body">
                                     <h5 class="card-title"><?php echo $fetch_product['name']; ?></h5>
-                                       <p class="card-text">Start From : <b><?= $fetch_product['price']; ?></b></p>
+                                    <p class="card-text">Start From : <b><?= $fetch_product['price']; ?></b></p>
                                     <p class="card-text"><?= $description; ?></p>
-                                   
+
                                     <a href="auction/auction.php?id=<?= $fetch_product['id_product']; ?>">
-                                    <button type="button" class="btn btn-outline-warning" >
-                                       More Details 
-                                    </button>
-                                 </a>
+                                       <button type="button" class="btn btn-outline-warning">
+                                          More Details
+                                       </button>
+                                    </a>
                                  </div>
-                               
+
                               </div>
                            </div>
                         </div>
@@ -104,6 +104,65 @@ require 'database/database.php';
          </section>
       </div>
    </div>
+
+   <div class="second-section">
+      <div class="header">
+         <h1>Expired Product</h1>
+      </div>
+      
+      <div class="container">
+         <section class="products">
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+               <?php
+               //connect into class database
+               $db = new database();
+
+               //query shows data from tb_auction
+               $query = $db->getConnection()->query("SELECT * FROM tb_auction ORDER BY price DESC LIMIT 1");
+               $auction_data = $query->fetch_assoc();
+
+               //query shows data from tb_product
+               $sql = $db->getConnection()->query("SELECT * FROM `tb_product` WHERE `status`='expired'");
+               if (mysqli_num_rows($sql) > 0) {
+                  while ($fetch_product = mysqli_fetch_assoc($sql)) {
+
+                     //limit shows character on description
+                     $description = $fetch_product["description"];
+                     $description = substr($description, 0, 150);
+
+               ?>
+                     <div class="col-md-6">
+                        <div class="card mb-3">
+                           <div class="row g-0">
+                              <div class="col-md-4">
+                                 <img src="data_image/<?php echo $fetch_product['image']; ?>" class="card-img-top " alt="">
+                              </div>
+                              <div class="col-md-8">
+                                 <div class="card-body">
+                                    <h5 class="card-title"><?php echo $fetch_product['name']; ?></h5>
+                                    <p class="card-text">Start From : <b><?= $fetch_product['price']; ?></b></p>
+                                    <p class="card-text"><?= $description; ?></p>
+
+                                    <a href="auction/auction.php?id=<?= $fetch_product['id_product']; ?>">
+                                       <button type="button" class="btn btn-outline-warning">
+                                          More Details
+                                       </button>
+                                    </a>
+                                 </div>
+
+                              </div>
+                           </div>
+                        </div>
+                     </div>
+               <?php
+                  }
+               }
+               ?>
+            </div>
+         </section>
+      </div>
+   </div>
+
 
    <div class="footer">
 

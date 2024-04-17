@@ -16,7 +16,7 @@ if (!isset($_SESSION['username'])) { // Jika pengguna belum login
       <ul>
         <li><a href="index.php">Home</a></li>
         <li><a href="about.php">About</a></li>
-        <li><a href="cart.php">Cart</a></li>
+        <li><a href="/auction/cart.php">Cart</a></li>
         <button><a href="account/login.php">LogIn</a></button>
         <button><a href="account/signup.php">SignUp</a></button>
       </ul>
@@ -33,8 +33,8 @@ if (!isset($_SESSION['username'])) { // Jika pengguna belum login
       <ul>
         <li><a href="index.php">Home</a></li>
         <li><a href="about.php">About</a></li>
-        <li><a href="cart.php">Cart</a></li>
-        <button><a href="account/account.php">account</a></button>
+        <li><a href="auction/cart.php">Cart</a></li>
+        <button><a href="account/profile_page.php">account</a></button>
       </ul>
     </div>
   </nav>

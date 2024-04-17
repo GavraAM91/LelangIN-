@@ -23,13 +23,13 @@ if (isset($_POST["submit"])) {
     $password = $_POST['password'];
     $checkbox = $_POST['checkbox'];
 
-    if(!isset($_POST['remember'])) {
+    if(!isset($_POST['checkbox'])) {
         echo "<script>
             alert('Cookie belum dicentang');
         </script>";
     } else { 
         //input kedalam variable
-        $user = new account($username, $password, null, null, $checkbox);
+        $user = new account(null, $username, $password, null, null, $checkbox);
         $user->login();
     }
 }
@@ -71,7 +71,7 @@ if (isset($_POST["submit"])) {
                     </div>
                     <div class=""></div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="remember" id="remember" value=1 id="flexCheckDefault">
+                        <input class="form-check-input" type="checkbox" name="checkbox" id="remember" value=1 id="flexCheckDefault">
                         <label class="form-check-label" for="flexCheckDefault">
                             Activate Cookie
                         </label>

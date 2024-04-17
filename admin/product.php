@@ -1,7 +1,7 @@
 <?php
 require 'connection.php';
 // require 'function.php';
-require 'timer.php';
+require '../timer/timer.php';
 
 $db = new database();
 
@@ -41,13 +41,13 @@ if ($_SESSION['role'] != "admin") {
 if (isset($_POST['add_product'])) {
     $name = $_POST['product_name'];
     $description = $_POST['description'];
+    $quantity = $_POST['$quantity'];
     $price = $_POST['price'];
-    $quantity = $_POST['quantity'];
 
     // Proses upload gambar
     $image = $_FILES['image']['name'];
 
-    $query = new product(null, $image, $name, $description, $price);
+    $query = new product(null, $image, $name, $description, $quantity, $price);
     $query->addProduct();
 }
 
@@ -57,16 +57,17 @@ if (isset($_POST['edit_product'])) {
     $id = $_POST['id_product'];
     $name = $_POST['product_name'];
     $description = $_POST['description'];
+    $quantity = $_POST['quantity'];
     $price = $_POST['price'];
     // Proses upload gambar
     $image = $_FILES['image']['name'];
 
     //jika data image kosong
     if (empty($image)) {
-        $query = new product($id, null, $name, $description, $price);
+        $query = new product($id, null, $name, $description,$quantity, $price);
         $query->editProduct();
     } else { //jika ada data dalam $image
-        $query = new product($id, $image, $name, $description, $price);
+        $query = new product($id, $image, $name, $description, $quantity, $price);
         $query->editProduct();
     }
 }
@@ -183,6 +184,10 @@ if (isset($_POST['auction_option'])) {
                                                     <input type="text" class="form-control" id="description" name="description" placeholder="Enter description" required>
                                                 </div>
                                                 <div class="form-group">
+                                                    <label for="description">Quantity </label>
+                                                    <input type="text" class="form-control" id="quantity" name="quantity" value=1 placeholder="Enter description" disabled>
+                                                </div>
+                                                <div class="form-group">
                                                     <label for="price">Price </label>
                                                     <input type="text" class="form-control" id="price" name="price" placeholder="Enter price Rp." required>
                                                 </div>
@@ -215,6 +220,7 @@ if (isset($_POST['auction_option'])) {
                                                 <th>image</th>
                                                 <th>name</th>
                                                 <th>Description</th>
+                                                <th>Quantity</th>
                                                 <th>price</th>
                                                 <th>date added</th>
                                                 <th>date closed</th>
@@ -229,6 +235,7 @@ if (isset($_POST['auction_option'])) {
                                                 <th>image</th>
                                                 <th>name</th>
                                                 <th>Description</th>
+                                                <th>Quantity</th>
                                                 <th>price</th>
                                                 <th>Date added</th>
                                                 <th>Date closed</th>
@@ -248,6 +255,7 @@ if (isset($_POST['auction_option'])) {
                                                     <td><img src="../data_image/<?php echo $rows['image']; ?>" style="width: 250px; height: 250px; object-fit: contain;"></td>
                                                     <td><?= $rows['name']; ?></td>
                                                     <td><?= $rows['description']; ?></td>
+                                                    <td><?= $rows['quantity']; ?></td>
                                                     <td><?= $rows['price']; ?></td>
                                                     <td><?= $rows['date_added']; ?></td>
                                                     <td><?= $rows['date_closed']; ?></td>
