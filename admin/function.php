@@ -67,7 +67,6 @@ class product
         $this->price = $price;
     }
 
-
     public function addProduct()
     {
         //set date 
@@ -119,10 +118,10 @@ class product
                 alert('data berhasil ditambahkan!';
             </script>";
 
-            $sql = $db->getConnection()->prepare("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`,`price`,`date_added`)  
-                VALUES (?,?,?,?,?,?)");
+            $sql = $db->getConnection()->prepare("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`,`quantity`,`price`,`date_added`)  
+                VALUES (?,?,?,?,?,?,?)");
 
-            $sql->bind_param('sssss', $newID, $this->image, $this->name, $this->description, $this->price,$date);
+            $sql->bind_param('sssssss', $newID, $this->image, $this->name, $this->description,$this->quantity,$this->price,$date);
 
             // $sql = $db->getConnection()->query("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`, `quantity`, `price`,`date_added`)  
             //     VALUES ('$newID', '$this->image', '$this->name', '$this->description', '$this->quantity', '$this->price', '$date')");

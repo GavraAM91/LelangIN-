@@ -1,7 +1,7 @@
 <?php
 require 'connection.php';
 // require 'function.php';
-require '../timer/timer.php';
+require 'timer.php';
 
 $db = new database();
 
@@ -39,11 +39,14 @@ if ($_SESSION['role'] != "admin") {
 
 //add product
 if (isset($_POST['add_product'])) {
+    //set quantity = 1
+    $quantity = 1;
+
+    //receive data send from form
     $name = $_POST['product_name'];
     $description = $_POST['description'];
-    $quantity = $_POST['$quantity'];
     $price = $_POST['price'];
-
+    
     // Proses upload gambar
     $image = $_FILES['image']['name'];
 
@@ -79,6 +82,7 @@ if (isset($_POST['delete_product'])) {
     $query = new product($id, null, null, null, null);
     $query->deleteProduct();
 }
+
 
 //input time into database
 if (isset($_POST['auction_option'])) {
@@ -185,7 +189,7 @@ if (isset($_POST['auction_option'])) {
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="description">Quantity </label>
-                                                    <input type="text" class="form-control" id="quantity" name="quantity" value=1 placeholder="Enter description" disabled>
+                                                    <input type="text" class="form-control" id="quantity" name="quantity" placeholder="Enter description" disabled>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="price">Price </label>
@@ -274,10 +278,11 @@ if (isset($_POST['auction_option'])) {
                                                                         <h5 class="modal-title" id="exampleModalLabel"><?php echo $rows['name']; ?></h5>
                                                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                                     </div>
-                                                                    <form method="post" action="" enctype="multipart/form-data" id="input_id">
+                                                                    <form method="post" action="" enctype="multipart/form-data">
                                                                         <input type="hidden" name="id_product" id="uniqueIdProduct" value="<?= $rows['id_product']; ?>">
+                                                                        <?php echo $rows['id_product'];?>
                                                                         <div class="input-group mb-3">
-                                                                            <input type="hidden" name="id_product" value="<?= $rows['id_product']; ?>">
+                                                                            <input type="hidden" name="id_product" id="uniqueIdProduct" value="<?= $rows['id_product']; ?>">
                                                                             <input type="date" class="form-control" name="date" id="date" placeholder="date">
                                                                         </div>
                                                                         <div class="input-group mb-3">
@@ -355,7 +360,7 @@ if (isset($_POST['auction_option'])) {
 
                                                 if ($rows['status'] == "open") { ?>
                                         <p id="demo"></p>
-                                    <?php } else { ?>
+                                    <?php } else if($rows['status'] == "expired"){ ?>
                                         expired
                                     <?php }
 

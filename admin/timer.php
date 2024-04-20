@@ -10,11 +10,20 @@ date_default_timezone_set('Asia/Jakarta');
 $query = $db->getConnection()->query("SELECT * FROM tb_countdown ORDER BY id DESC LIMIT 1");
 $data = $query->fetch_assoc();
 
+$jsonData = json_encode([
+    'id_product' => $data['id_product']
+]);
+
+var_dump($data['id_product']);
+
 if ($data !== null) {
     $datetime = $data['date'] . " " . $data['hour'] . ":" . $data['minute'] . ":" . $data['second'];
     $datetime = strtotime($datetime);
 }
+
 ?>
+
+
 
 <script>
     //receive data from form
@@ -49,24 +58,26 @@ if ($data !== null) {
     });
 
     function sendDataToPHP() {
+    const data = <?php echo $jsonData; ?>; // data is already an object
+    const productId = data.id_product; // Access the id_product property directly
 
-        var id_product = document.getElementById("uniqueIdProduct").value;
-        console.log(id_product);
+    console.log(`Product ID: ${productId}`);
 
-        //send data to php 
-        fetch('ajax_timer.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `data=expired&id_product=${id_product}`,
-            })
-            .then(response => response.text())
-            .then(result => {
-                console.log(result);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    }
+    // Assuming 'productId' contains the correct value, send it to your PHP script
+    fetch('ajax_timer.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `data=expired&id_product=${productId}`,
+        })
+        .then(response => response.text())
+        .then(result => {
+            console.log(result);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+}
+
 </script>
