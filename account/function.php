@@ -97,6 +97,9 @@ class account
                 // Password benar, login berhasil
                 $_SESSION['role'] = $user['role'];
 
+                //set id into session
+                $_SESSION['id_user'] = $user['id_user'];
+
                 // Redireksi berdasarkan role
                 if ($user['role'] == 'admin') {
 

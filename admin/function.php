@@ -57,7 +57,7 @@ class product
     private $id, $image, $name, $description, $quantity, $price;
 
     //construct
-    public function __construct($id = "id", $image = "image", $name = "name", $description = "description", $quantity=1 ,$price = "price")
+    public function __construct($id = "id", $image = "image", $name = "name", $description = "description", $quantity = 1, $price = "price")
     {
         $this->id = $id;
         $this->image = $image;
@@ -121,7 +121,7 @@ class product
             $sql = $db->getConnection()->prepare("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`,`quantity`,`price`,`date_added`)  
                 VALUES (?,?,?,?,?,?,?)");
 
-            $sql->bind_param('sssssss', $newID, $this->image, $this->name, $this->description,$this->quantity,$this->price,$date);
+            $sql->bind_param('sssssss', $newID, $this->image, $this->name, $this->description, $this->quantity, $this->price, $date);
 
             // $sql = $db->getConnection()->query("INSERT INTO `tb_product`(`id_product`, `image`, `name`, `description`, `quantity`, `price`,`date_added`)  
             //     VALUES ('$newID', '$this->image', '$this->name', '$this->description', '$this->quantity', '$this->price', '$date')");
@@ -197,7 +197,7 @@ class product
         //jika image empty atau kosong
         if (empty($this->image)) {
             $sql = $db->getConnection()->prepare("UPDATE `tb_product` SET `name`=?,`description`=?,`quantity`=?,`price`=? WHERE id_product=? ");
-            $sql->bind_param('ssssss', $this->name, $this->description,$this->quantity, $this->price, $this->id);
+            $sql->bind_param('ssssss', $this->name, $this->description, $this->quantity, $this->price, $this->id);
         } else {
             //jika image berisi
             //update data
@@ -267,7 +267,7 @@ class timer
         $data = $sql->get_result();
 
 
-        if ($data->num_rows == 0 ) {
+        if ($data->num_rows == 0) {
 
             $sql = "INSERT INTO `tb_countdown` (`id_product`, `date`, `hour`, `minute`, `second`) 
                     VALUES (?,?,?,?,?)";
@@ -313,5 +313,153 @@ class timer
             $result[] = $data;
         }
         return $result;
+    }
+}
+
+class delete_data
+{
+    private $delete_data;
+
+    public function __construct($delete_data)
+    {
+        $this->delete_data = $delete_data;
+    }
+
+    public function deleteAllProduct()
+    {
+        var_dump($this->delete_data);
+
+        //inisialisasi database
+        $db = new database();
+
+        if ($this->delete_data == 1) {
+            $sqlData = $db->getConnection()->query("DELETE FROM `tb_product`");
+
+            if ($sqlData) {
+                echo "<script>
+                alert('HAPUS DATA BERHASIL!');
+            </script>";
+                header("Location: product.php");
+            } else {
+                echo "<script>
+                alert('HAPUS DATA GAGAL!');
+            </script>";
+                header("Location: product.php");
+            }
+        }
+    }
+}
+
+class auction
+{
+    protected $ammount_auction, $id_user, $id_product;
+
+    public function __construct($ammount_auction = "ammount_auction", $id_user = "id_user", $id_product = "id_product")
+    {
+        $this->ammount_auction = $ammount_auction;
+        $this->id_user = $id_user;
+        $this->id_product = $id_product;
+    }
+
+    public function addAuction()
+    {
+        $db = new database();
+
+        $sql = $db->getConnection()->prepare("INSERT INTO `tb_auction` (`id_user`, `id_product`, `price`) VALUES (?,?,?)");
+
+        $sql->bind_param("sss", $this->id_user,  $this->id_product, $this->ammount_auction);
+
+        if ($sql->execute()) {
+            echo "<script> 
+                alert('Data Auction berhasil ditambahkan');
+            </scrit>";
+            header("Location: ../index.php");
+        } else {
+            echo "<script> 
+            alert('Data Auction berhasil ditambahkan');
+            </scrit>";
+            header("Location: ../index.php");
+        }
+    }
+
+    public function showData()
+    {
+        $db = new database();
+
+        $sql_auction = $db->getConnection()->query("SELECT * FROM tb_auction ORDER BY price DESC LIMIT 1");
+        $auction_data = $sql_auction->fetch_array();
+
+        // if ($auction_price == null) {
+        //     $auction_price['price'] = 0;
+        // }
+    }
+}
+
+class address
+{
+    private $id_user,
+        $desa,
+        $kecamatan,
+        $kota,
+        $provinsi,
+        $negara;
+
+    public function __construct($id_user = "id_user", $desa = "desa", $kecamatan = "kecamatan", $kota = "kota", $provinsi = "provinsi", $negara = "negara")
+    {
+        $this->id_user = $id_user;
+        $this->desa = $desa;
+        $this->kecamatan = $kecamatan;
+        $this->kota = $kota;
+        $this->provinsi = $provinsi;
+        $this->negara = $negara;
+    }
+
+    public function addAddress()
+    {
+        //open database or make new database class
+        $db = new database();
+
+        //make query insert into database
+        $sql = "INSERT INTO `tb_address`(`id_user`, `desa`, `kecamatan`, `kabupaten/kota`, `provinsi`, `negara`) 
+                VALUES (?,?,?,?,?,?)";
+        $query = $db->getConnection()->prepare($sql);
+        $query->bind_param("ssssss", $this->id_user, $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara);
+        $query->execute();
+
+        if ($query) {
+            echo "<script>
+                alert('data alamat berhasil ditambahkan');
+            </script>";
+            header("Location: ../index.php");
+        } else {
+            echo "<script>
+                alert('data alamat gagal ditambahkan');
+            </script>";
+            header("Location: ../index.php");
+        }
+    }
+
+    public function editAdress()
+    {
+        //open database
+        $db = new database();
+
+        //make query update into database
+        $sql = "UPDATE `tb_address` SET `id_user`=?,`desa`=?,`kecamatan`=?,`kabupaten/kota`=?,`provinsi`=?,`negara`=? WHERE `id_user`=?";
+        $query = $db->getConnection()->prepare($sql);
+        $query->bind_param("sssssss", $this->id_user, $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara, $this->id_user);
+        $query->execute();
+
+        if ($query) {
+            echo "<script>
+                alert('data alamat berhasil ditambahkan');
+            </script>";
+            header("Location: ../index.php");
+        } else {
+            echo "<script>
+                alert('data alamat gagal ditambahkan');
+            </script>";
+            header("Location: ../index.php");
+        }
     }
 }

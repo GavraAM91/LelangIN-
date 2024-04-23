@@ -1,17 +1,14 @@
 <?php
 
-//connect into function.php
-require_once 'function.php';
+include 'function.php';
 
-//start the session
 session_start();
 
-//declare session
-$username = $_SESSION['username'];
+$db = new database();
 
-//check if username doesn't have value
-if(!isset($username)){
-   //direct into login page
+$user_id = $_SESSION['username'];
+
+if(!isset($user_id)){
    header('location:login.php');
 }
 
@@ -24,16 +21,14 @@ if(!isset($username)){
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-   <title>LelangIn | Account</title>
+   <title>user page</title>
 
    <!-- font awesome cdn link  -->
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
 
-   <!-- bootstrap  -->
+   <!-- custom css file link  -->
    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-
-   <!-- CSS -->
-   <link rel="stylesheet" href="../style/style_.css">
+   <link rel="stylesheet" href="../style/style_setting.css">
 
 
 </head>
@@ -44,22 +39,17 @@ if(!isset($username)){
 <section class="profile-container">
 
 <?php
-   //declare the database 
-   $db = new database();
-
    $select_profile = $db->getConnection()->prepare("SELECT * FROM `tb_account` WHERE username = ?");
-   $select_profile->bind_param("s", $username);
+   $select_profile->bind_param("s", $user_id);
    $select_profile->execute();
    $result = $select_profile->get_result();
 
-   $result = $result->fetch_assoc();
-
    // Check if the query returned any results
-   if ($result) {
+   if ($result && $fetch_profile = $result->fetch_assoc()) {
    ?>
       <div class="profile">
-         <img src="../img-profile/<?= $result['image']; ?>" alt="">
-         <h3><?= $result['username']; ?></h3>
+         <img src="../profile_image/<?= $fetch_profile['image']; ?>" alt="">
+         <h3><?= $fetch_profile['username']; ?></h3>
          <a href="update_profile.php" class="btn btn-primary-outline" name="update-profile">update profile</a>
          <a href="../order.php" class="btn btn-primary-outline">My Order</a>
          <a href="../users/index.php" class="btn">view shop</a>
@@ -67,7 +57,7 @@ if(!isset($username)){
       </div>
    <?php
    } else {
-      echo "No profile found for user with ID: $username";
+      echo "No profile found for user with ID: $user_id";
    }
 
    // Close the prepared statement

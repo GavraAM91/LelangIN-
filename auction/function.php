@@ -1,5 +1,21 @@
 <?php
 
+class IDGenerator
+{
+    private $lastID;
+
+    public function __construct($lastID = 0)
+    {
+        $this->lastID = $lastID;
+    }
+
+    public function generateID()
+    {
+        $this->lastID++;
+        return "ADRS" . str_pad($this->lastID, 3, "0", STR_PAD_LEFT);
+    }
+}
+
 class database
 {
     private $host = "localhost"; // Host database
@@ -23,62 +39,26 @@ class database
 
         return $this->conn; // Mengembalikan objek koneksi
     }
-}
-
-class auction
-{
-    protected $ammount_auction, $id_user, $id_product;
-
-    public function __construct($ammount_auction = "ammount_auction", $id_user = "id_user", $id_product = "id_product")
+    public function getLastAddressID()
     {
-        $this->ammount_auction = $ammount_auction;
-        $this->id_user = $id_user;
-        $this->id_product = $id_product;
-    }
-
-    public function addAuction()
-    {
-        $db = new database();
-
-        $sql = $db->getConnection()->prepare("INSERT INTO `tb_auction` (`id_user`, `id_product`, `price`) VALUES (?,?,?)");
-
-        $sql->bind_param("sss", $this->id_user,  $this->id_product, $this->ammount_auction);
-
-        if ($sql->execute()) {
-            echo "<script> 
-                alert('Data Auction berhasil ditambahkan');
-            </scrit>";
-            header("Location: ../index.php");
+        $this->conn = $this->getConnection();
+        $result = $this->conn->query("SELECT id_address FROM tb_address ORDER BY id_address DESC LIMIT 1");
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $lastID = $row['id_address'];
+            return intval(substr($lastID, 3)); // Mengembalikan hanya bagian numerik dari ID
         } else {
-            echo "<script> 
-            alert('Data Auction berhasil ditambahkan');
-            </scrit>";
-            header("Location: ../index.php");
+            return 0; // Jika tidak ada entri, mulai dari 0
         }
     }
+}
 
-    public function showData()
+class address
+{
+    private $id_user, $desa, $kecamatan, $kota, $provinsi, $negara;
+
+    public function __construct($id_user = "id_user", $desa = "desa", $kecamatan = "kecamatan", $kota = "kota", $provinsi = "provinsi", $negara = "negara")
     {
-        $db = new database();
-
-        $sql_auction = $db->getConnection()->query("SELECT * FROM tb_auction ORDER BY price DESC LIMIT 1");
-        $auction_data = $sql_auction->fetch_array();
-
-        // if ($auction_price == null) {
-        //     $auction_price['price'] = 0;
-        // }
-    }
-} 
-
-class address {
-    private $id_user,
-    $desa,
-    $kecamatan, 
-    $kota,
-    $provinsi,
-    $negara;
-
-    public function __construct ($id_user = "id_user", $desa = "desa", $kecamatan = "kecamatan", $kota = "kota", $provinsi = "provinsi", $negara = "negara") {
         $this->id_user = $id_user;
         $this->desa = $desa;
         $this->kecamatan = $kecamatan;
@@ -87,51 +67,54 @@ class address {
         $this->negara = $negara;
     }
 
-    public function addAddress() {
-        //open database or make new database class
+    public function addAddress()
+    {
+        //open database
         $db = new database();
+        $lastIDFromDB = $db->getLastAddressID(); // Dapatkan lastID dari database
+        $generator = new IDGenerator($lastIDFromDB); // Inisialisasi IDGenerator dengan lastID
+        $newID = $generator->generateID(); // Generate ID baru
 
-        //make query insert into database
-        $sql = "INSERT INTO `tb_address`(`id_user`, `desa`, `kecamatan`, `kabupaten/kota`, `provinsi`, `negara`) 
-                VALUES (?,?,?,?,?,?)";
-        $query = $db->getConnection()->prepare($sql);
-        $query->bind_param("ssssss", $this->id_user, $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara);
-        $query->execute();
+        //insert into query
+        $query_data = "INSERT INTO `tb_address` (`id_address`,`id_user`, `desa`, `kecamatan`, `kota/kabupaten`, `provinsi`, `negara`) VALUES (?,?,?,?,?,?,?)";
+        $query_data = $db->getConnection()->prepare($query_data);
+        $query_data->bind_param("sssssss", $newID, $this->id_user, $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara);
+        $query_data = $query_data->execute();
 
-        if($query) {
+        if ($query_data) {
             echo "<script>
-                alert('data alamat berhasil ditambahkan');
+                alert('data berhasil diinput ');
             </script>";
             header("Location: ../index.php");
         } else {
             echo "<script>
-                alert('data alamat berhasil ditambahkan');
+                alert('data gagal diinput ');
             </script>";
             header("Location: ../index.php");
+            return false;
         }
     }
 
-    public function editAdress() {
-        //open database
+    public function editAddress()
+    {
         $db = new database();
 
-        //make query update into database
-        $sql = "UPDATE `tb_address` SET `id_user`=?,`desa`=?,`kecamatan`=?,`kabupaten/kota`=?,`provinsi`=?,`negara`=? WHERE `id_user`=?";
-        $query = $db->getConnection()->prepare($sql);
-        $query->bind_param("sssssss", $this->id_user, $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara, $this->id_user);
-        $query->execute();
+        //insert into query
+        $query_data = "UPDATE `tb_address` SET `desa`=?,`kecamatan`=?,`kabupaten/kota`=?,`provinsi`=?,`negara`=?";
+        $query_data = $db->getConnection()->prepare($query_data);
+        $query_data->bind_param("sssss", $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara);
 
-        if($query) {
+        if ($query_data->execute()) {
             echo "<script>
-                alert('data alamat berhasil ditambahkan');
+            alert('data berhasil di update ');
             </script>";
             header("Location: ../index.php");
         } else {
             echo "<script>
-                alert('data alamat berhasil ditambahkan');
-            </script>";
+            alert('data gagal di update ');
+        </script>";
             header("Location: ../index.php");
+            return false;
         }
     }
 }
-    

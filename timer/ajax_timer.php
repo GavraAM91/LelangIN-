@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $data = $_POST['data'];
         $id_product = $_POST['id_product'];
 
-        var_dump($id_product);
+        // var_dump($id_product);
 
         //mengambil data tanggal close
         date_default_timezone_set("Asia/Jakarta");

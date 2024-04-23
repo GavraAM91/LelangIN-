@@ -10,11 +10,13 @@ date_default_timezone_set('Asia/Jakarta');
 $query = $db->getConnection()->query("SELECT * FROM tb_countdown ORDER BY id DESC LIMIT 1");
 $data = $query->fetch_assoc();
 
+if($data !== null) {
 $jsonData = json_encode([
     'id_product' => $data['id_product']
 ]);
+}
 
-var_dump($data['id_product']);
+// var_dump($data['id_product']);
 
 if ($data !== null) {
     $datetime = $data['date'] . " " . $data['hour'] . ":" . $data['minute'] . ":" . $data['second'];

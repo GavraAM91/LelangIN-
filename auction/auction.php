@@ -1,6 +1,7 @@
 <?php
 
 require '../timer/timer.php';
+// require 'function.php';
 
 session_start();
 

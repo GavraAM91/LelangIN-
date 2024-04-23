@@ -1,7 +1,7 @@
 <?php
 require 'connection.php';
 // require 'function.php';
-require 'timer.php';
+require '../timer/timer.php';
 
 $db = new database();
 
@@ -46,7 +46,7 @@ if (isset($_POST['add_product'])) {
     $name = $_POST['product_name'];
     $description = $_POST['description'];
     $price = $_POST['price'];
-    
+
     // Proses upload gambar
     $image = $_FILES['image']['name'];
 
@@ -57,7 +57,6 @@ if (isset($_POST['add_product'])) {
 // if edit button was clicked
 if (isset($_POST['edit_product'])) {
 
-    $id = $_POST['id_product'];
     $name = $_POST['product_name'];
     $description = $_POST['description'];
     $quantity = $_POST['quantity'];
@@ -67,7 +66,7 @@ if (isset($_POST['edit_product'])) {
 
     //jika data image kosong
     if (empty($image)) {
-        $query = new product($id, null, $name, $description,$quantity, $price);
+        $query = new product($id, null, $name, $description, $quantity, $price);
         $query->editProduct();
     } else { //jika ada data dalam $image
         $query = new product($id, $image, $name, $description, $quantity, $price);
@@ -94,6 +93,17 @@ if (isset($_POST['auction_option'])) {
 
     $query = new timer($id_product, $date, $hour, $minute, $second);
     $query->time();
+}
+
+//delete all product data
+if (isset($_POST['delete_data_product'])) {
+
+    $num_data = 1;
+
+    // var_dump($_POST['delete_data_product']);
+
+    $query = new delete_data($num_data);
+    $query->deleteAllProduct();
 }
 
 ?>
@@ -189,7 +199,7 @@ if (isset($_POST['auction_option'])) {
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="description">Quantity </label>
-                                                    <input type="text" class="form-control" id="quantity" name="quantity" placeholder="Enter description" disabled>
+                                                    <input type="text" class="form-control" id="quantity" name="quantity" placeholder="Enter description" value="1" disabled>
                                                 </div>
                                                 <div class="form-group">
                                                     <label for="price">Price </label>
@@ -205,10 +215,40 @@ if (isset($_POST['auction_option'])) {
                             </div>
                         </div>
 
-                        <!-- Delete Delete All Product-->
-                        <a href="product_add.php" class="btn btn-danger">
-                            <span class="text">Delete All Product</span>
-                        </a>
+                        <!-- Delete All Product-->
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#delete_all_product">
+                            Delete All Product
+                        </button>
+
+                        <!-- Modal ADD PRODUCT -->
+                        <div class="modal fade" id="delete_all_product" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">WARNING!</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="form_reg">
+                                            <form method="POST" action="" enctype="multipart/form-data">
+                                                <!-- Form content here -->
+                                                <div class="message">
+                                                    <p>Are you sure to delete all product?</p>
+                                                </div>
+                                                <div class="submit">
+                                                    <button type="button" class="btn btn-outline-warning" name="cancel" data-dismiss="modal">
+                                                        Cancel
+                                                    </button>
+                                                    <button type="submit" name="delete_data_product" class="btn btn-danger">Delete All Product</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- DataTales Example -->
                         <div class="card shadow mb-4">
@@ -280,7 +320,7 @@ if (isset($_POST['auction_option'])) {
                                                                     </div>
                                                                     <form method="post" action="" enctype="multipart/form-data">
                                                                         <input type="hidden" name="id_product" id="uniqueIdProduct" value="<?= $rows['id_product']; ?>">
-                                                                        <?php echo $rows['id_product'];?>
+                                                                        <?php echo $rows['id_product']; ?>
                                                                         <div class="input-group mb-3">
                                                                             <input type="hidden" name="id_product" id="uniqueIdProduct" value="<?= $rows['id_product']; ?>">
                                                                             <input type="date" class="form-control" name="date" id="date" placeholder="date">
@@ -360,7 +400,7 @@ if (isset($_POST['auction_option'])) {
 
                                                 if ($rows['status'] == "open") { ?>
                                         <p id="demo"></p>
-                                    <?php } else if($rows['status'] == "expired"){ ?>
+                                    <?php } else if ($rows['status'] == "expired") { ?>
                                         expired
                                     <?php }
 

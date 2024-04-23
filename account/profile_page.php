@@ -51,22 +51,24 @@ $data_user = $data_user->fetch_assoc();
 
 <body>
     <h1 class="judul text-center">Account Page</h1>
-
     <div class="personal-info p-3 rounded">
         <div class="row">
-            <!-- Detail Profile untuk Username -->
-            <div class="col-md-6 mb-3">
-                <h3>Username</h3>
-                <div class="detail-profile">
-                    <p><?= $data_user['username']; ?></p>
+            <div class="profile">
+                <img src="../profile_image/<?= $data_user['image']; ?>" alt="" style="height: 200px; width:200px;">
+                <!-- Detail Profile untuk Username -->
+                <div class="col-md-6 mb-3">
+                    <h3>Username</h3>
+                    <div class="detail-profile">
+                        <p><?= $data_user['username']; ?></p>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Detail Profile untuk Email -->
-            <div class="col-md-6 mb-3">
-                <h3>Email</h3>
-                <div class="detail-profile">
-                    <p><?= $data_user['email']; ?></p>
+                <!-- Detail Profile untuk Email -->
+                <div class="col-md-6 mb-3">
+                    <h3>Email</h3>
+                    <div class="detail-profile">
+                        <p><?= $data_user['email']; ?></p>
+                    </div>
                 </div>
             </div>
         </div>
