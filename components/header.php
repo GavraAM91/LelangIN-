@@ -5,6 +5,7 @@
   <link rel="stylesheet" href="../style/style.css">
 </head>
 <?php
+if(session_status() == PHP_SESSION_NONE) {
 session_start();
 if (!isset($_SESSION['username'])) { // Jika pengguna belum login
 ?>
@@ -40,6 +41,8 @@ if (!isset($_SESSION['username'])) { // Jika pengguna belum login
   </nav>
 <?php
 }
+}
+session_abort();
 ?>
 
 </html>

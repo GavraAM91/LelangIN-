@@ -56,9 +56,9 @@ class database
 
 class account
 {
-    private $image, $username, $password, $confirmPassword, $email,$checkbox;
+    private $image, $username, $password, $confirmPassword, $email, $checkbox, $id_user;
 
-    public function __construct($image = "image", $username = "username", $password = "password", $confirmPassword = "confirmPassword", $email = "email", $checkbox = "checkbox")
+    public function __construct($image = "image", $username = "username", $password = "password", $confirmPassword = "confirmPassword", $email = "email", $checkbox = "checkbox", $id_user = "id_user")
     {
         $this->image = $image;
         $this->username = $username;
@@ -66,6 +66,7 @@ class account
         $this->confirmPassword = $confirmPassword;
         $this->email = $email;
         $this->checkbox = $checkbox;
+        $this->id_user = $id_user;
     }
 
     //login 
@@ -247,6 +248,86 @@ class account
         setcookie('key', '', time() - 3600);
 
         header('location: signup.php');
+    }
+
+    public function editAccount()
+    {
+        $db = new database();
+
+        //open database
+        $data_test = $db->getConnection()->query("SELECT * FROM tb_account");
+
+        $hashed_password = password_hash($this->password, PASSWORD_DEFAULT);
+
+        $ukuran_file = $_FILES['image']['size'];
+        $error = $_FILES['image']['error'];
+        $tmp_file = $_FILES['image']['tmp_name'];
+
+        // var_dump($image);
+        // exit;
+        if ($error === 4) {
+            echo "<script>alert('pilih gambar terlebih dahulu!');</script>";
+            header("Location: product.php");
+            return false;
+        }
+
+        $ekstensiGambarValid = ['jpg', 'jpeg', 'png'];
+        $ekstensiGambar = explode('.', $this->image);
+        $ekstensiGambar = strtolower(end($ekstensiGambar));
+
+        if (!in_array($ekstensiGambar, $ekstensiGambarValid)) {
+            echo "<script>alert('yang anda upload bukan gambar!');</script>";
+            header("Location: product.php");
+            return false;
+        }
+
+        if ($ukuran_file > 5242880) {
+            echo "<script>alert('ukuran terlalu besar!');</script>";
+            header("Location: product.php");
+            exit;
+        }
+
+        //jika pingin nama gambar di acak
+        // $newImage = uniqid() . '.' . $ekstensiGambar;
+        // $storage = '../data_image/' . $newImage;
+
+        //jika ingin nama gambar sama seperti yang diinput
+        $targetDir = '../profile_image/';
+        $targetFile = $targetDir . basename($this->image);
+
+        // gunakan ini jika ingin data gambar diacak
+        // if (move_uploaded_file($tmp_file, $storage)) {
+        if (move_uploaded_file($tmp_file, $targetFile)) {
+            echo "<script>
+                    alert('berhasil mengunggah gambar!');
+               </script>";
+        } else {
+            echo "Gagal mengunggah gambar. Kode Kesalahan: " . $error;
+            echo "<br><a href='profile_page.php'>Kembali Ke Form</a>";
+        }
+
+        //edit profile 
+        if (empty($this->image)) {
+            $query_edit = "UPDATE `tb_account` SET `username`=?,`password`=?',`email`=? WHERE `id_user`=?";
+            $query_edit = $db->getConnection()->prepare($query_edit);
+            $query_edit->bind_param("ssss", $this->username, $hashed_password, $this->email, $this->id_user);
+        } else {
+            $query_edit = "UPDATE `tb_account` SET `image`=?,`username`=?,`password`=?,`email`=? WHERE `id_user`=?";
+            $query_edit = $db->getConnection()->prepare($query_edit);
+            $query_edit->bind_param("sssss", $this->image, $this->username, $hashed_password, $this->email, $this->id_user);
+        }
+
+        if ($query_edit->execute()) {
+            echo "<script>
+                alert('data berhasil di update');
+            </script>";
+            return true;
+        } else {
+            echo "<script>
+                alert('data gagal di update');
+            </script>";
+            return false;
+        }
     }
 }
 

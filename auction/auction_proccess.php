@@ -1,6 +1,6 @@
 <?php
 
-require 'function.php';
+require_once 'function.php';
 
 //open database
 $db = new database();

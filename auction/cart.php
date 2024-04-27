@@ -1,5 +1,5 @@
 <?php
-require 'function.php';
+require_once 'function.php';
 
 if(isset($_POST['checkout'])){  // Changed to POST method
    $select_cart = mysqli_query($conn, "SELECT * FROM `cart`");

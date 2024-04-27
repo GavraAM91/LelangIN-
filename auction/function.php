@@ -12,10 +12,9 @@ class IDGenerator
     public function generateID()
     {
         $this->lastID++;
-        return "ADRS" . str_pad($this->lastID, 3, "0", STR_PAD_LEFT);
+        return "ADR" . str_pad($this->lastID, 3, "0", STR_PAD_LEFT);
     }
 }
-
 class database
 {
     private $host = "localhost"; // Host database
@@ -79,9 +78,8 @@ class address
         $query_data = "INSERT INTO `tb_address` (`id_address`,`id_user`, `desa`, `kecamatan`, `kota/kabupaten`, `provinsi`, `negara`) VALUES (?,?,?,?,?,?,?)";
         $query_data = $db->getConnection()->prepare($query_data);
         $query_data->bind_param("sssssss", $newID, $this->id_user, $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara);
-        $query_data = $query_data->execute();
 
-        if ($query_data) {
+        if ($query_data->execute()) {
             echo "<script>
                 alert('data berhasil diinput ');
             </script>";

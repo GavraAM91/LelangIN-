@@ -11,9 +11,8 @@ body {
 .container {
     display: flex;
     flex-direction: column;
-    align-items: center;
     margin-top: 40px;
-    width: 800px;  /* Menyesuaikan lebar container */
+    width: 800px; /* Menyesuaikan lebar container */
     color: #000;
 }
 
@@ -27,30 +26,84 @@ body {
     background-color: #caf0f8;
     color: #000;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    flex-direction: column; 
     align-items: center;
     text-align: center;
-    width: 100%;
-    padding: 20px; /* Menambahkan padding untuk estetika */
-    box-sizing: border-box; /* Memastikan padding dan border dimasukkan dalam lebar total */
+    width: 45%; /* Mengurangi lebar container */
+    margin-left: auto; /* Memusatkan container secara horizontal */
+    margin-right: auto; /* Memusatkan container secara horizontal */
+    padding: 20px;
+    box-sizing: border-box;
+    border-radius: 150px; /* Menambahkan sudut bulat */
 }
 
-.personal-info h3 {
-    color: #808080;
-    font-size: 21.5px;
-    margin-right: 5px;
-    margin-bottom: 10px; /* Menambahkan spasi di bawah header */
-}
-
-.detail-profile {
+.profile-container {
     display: flex;
-    justify-content: space-between;
-    width: 100%; /* Menggunakan 100% lebar dari kontainer induknya */
+    align-items: center; /* Menyesuaikan item di tengah secara vertikal */
+    width: 100%;
+}
+
+
+.profile-details {
+    display: flex;
+    flex-direction: space-between;
+    justify-content: center;
+    flex: 1; /* Mengambil sisa ruang */
+    padding-left: 20px; /* Menambahkan padding di antara gambar dan detil */
+}
+
+.profile-image {
+    flex: 0 0 200px; /* Ukuran tetap untuk gambar profil */
+    display: flex;
+    justify-content: center; /* Memusatkan gambar secara horizontal dalam div */
+    padding-right: 30px;
+    margin-top: 30px;
+}
+
+.profile-image img {
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.detail button {
+    margin-top: 12px;
+}
+
+.detail {
+    margin: 40px;
+}
+.detail h3 {
+    color: #000;
+    font-size: 21.5px;
+    margin-bottom: 10px;
+}
+
+.detail p {
+    margin-bottom: 5px;
 }
 
 .card {
     width: 700px;
     border: none;
 }
- 
+
+.address {
+    color: #000;
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    text-align: center;
+    width: 70%; /* Mengurangi lebar container */
+    margin-left: auto; /* Memusatkan container secara horizontal */
+    margin-right: auto; /* Memusatkan container secara horizontal */
+    margin-top: 30px;
+    padding: 20px;
+    box-sizing: border-box;
+    border-radius: 15px; /* Menambahkan sudut bulat */
+}
+
+.address {
+    margin-top: 20px;
+}

@@ -1,5 +1,5 @@
 <?php
-require 'function.php';
+require_once 'function.php';
 //open data database 
 $db = new database();
 
@@ -24,6 +24,7 @@ if($sql_account->num_rows > 0) {
     }
 }
 
+// echo $user_id;
 //open database tb_address
 
 //jika tombol address_button dipencet
@@ -35,6 +36,19 @@ if(isset($_POST['address_button'])) {
     $kota = $_POST['kota'];
     $provinsi = $_POST['provinsi'];
     $negara = $_POST['negara'];
+
+    // var_dump($id_user);
+    // echo "<br>";
+    // var_dump($desa);
+    // echo "<br>";
+    // var_dump($kecamatan);
+    // echo "<br>";
+    // var_dump($kota);
+    // echo "<br>";
+    // var_dump($provinsi);
+    // echo "<br>";
+    // var_dump($negara);
+    // echo "<br>";
 
     $sql = new address($id_user, $desa, $kecamatan, $kota, $provinsi, $negara);
     $sql->addAddress(); 
