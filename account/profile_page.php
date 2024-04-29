@@ -47,6 +47,14 @@ if (isset($_POST['edit_profile'])) {
     $query->editAccount();
 }
 
+//logout
+if(isset($_POST['logout'])) {
+    
+    $id_user = $_POST['id_user'];
+
+    $query = new account (null, null, null, null, null, null, $id_user);
+    $query->logout();
+}
 ?>
 
 <!DOCTYPE html>
@@ -95,6 +103,10 @@ while ($data_user = $result->fetch_assoc()) :
                             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit_profile">
                                 Edit
                             </button>
+                            <form action="" method="post">
+                                <input type="hidden" name="user_id" value="<?= $data_user['id_user'];?>">
+                                <button type="submit" name="logout" class="btn btn-danger">Logout</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -133,7 +145,7 @@ while ($data_user = $result->fetch_assoc()) :
                                     </div>
                                     <div class="submit">
                                         <button type="submit" name="edit_profile" class="btn btn-primary">Edit</button>
-                                        <a href="logout.php" class="btn btn-danger">Log Out</a>
+                                        <!-- <a href="logout.php" class="btn btn-danger">Log Out</a> -->
                                     </div>
                                 </form>
                             </div>

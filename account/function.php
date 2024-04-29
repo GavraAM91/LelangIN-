@@ -237,6 +237,10 @@ class account
 
     public function logout()
     {
+        $db = new database();
+
+        //open query 
+        
         //delete SESSION
         session_start();
         $_SESSION = [];
