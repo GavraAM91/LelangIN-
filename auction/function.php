@@ -15,6 +15,23 @@ class IDGenerator
         return "ADR" . str_pad($this->lastID, 3, "0", STR_PAD_LEFT);
     }
 }
+
+class IDGeneratorcart
+{
+    private $lastID;
+
+    public function __construct($lastID = 0)
+    {
+        $this->lastID = $lastID;
+    }
+
+    public function generateID()
+    {
+        $this->lastID++;
+        return "CART" . str_pad($this->lastID, 3, "0", STR_PAD_LEFT);
+    }
+}
+
 class database
 {
     private $host = "localhost"; // Host database
@@ -50,6 +67,20 @@ class database
             return 0; // Jika tidak ada entri, mulai dari 0
         }
     }
+
+    public function getLastCartID()
+    {
+        $this->conn = $this->getConnection();
+        $result = $this->conn->query("SELECT id_cart FROM tb_cart ORDER BY id_cart DESC LIMIT 1");
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $lastID = $row['id_cart'];
+            return intval(substr($lastID, 3)); // Mengembalikan hanya bagian numerik dari ID
+        } else {
+            return 0; // Jika tidak ada entri, mulai dari 0
+        }
+    }
+    
 }
 
 class address
@@ -77,7 +108,7 @@ class address
         //insert into query
         $query_data = "INSERT INTO `tb_address` (`id_address`,`id_user`, `desa`, `kecamatan`, `kota/kabupaten`, `provinsi`, `negara`) VALUES (?,?,?,?,?,?,?)";
         $query_data = $db->getConnection()->prepare($query_data);
-        $query_data->bind_param("sssssss", $newID, $this->id_user, $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara);
+        $query_data->bind_param("sssssss",$newIDCart, $newID, $this->id_user, $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara);
 
         if ($query_data->execute()) {
             echo "<script>
@@ -98,21 +129,83 @@ class address
         $db = new database();
 
         //insert into query
-        $query_data = "UPDATE `tb_address` SET `desa`=?,`kecamatan`=?,`kabupaten/kota`=?,`provinsi`=?,`negara`=?";
+        $query_data = "UPDATE `tb_address` SET `desa`=?,`kecamatan`=?,`kota/kabupaten`=?,`provinsi`=?,`negara`=? WHERE id_user = ?";
         $query_data = $db->getConnection()->prepare($query_data);
-        $query_data->bind_param("sssss", $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara);
+        $query_data->bind_param("ssssss", $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara, $this->id_user);
 
         if ($query_data->execute()) {
             echo "<script>
             alert('data berhasil di update ');
             </script>";
-            header("Location: ../index.php");
         } else {
             echo "<script>
             alert('data gagal di update ');
         </script>";
-            header("Location: ../index.php");
             return false;
+        }
+    }
+}
+
+class checkout
+{
+    private $product_id, $user_id, $address_id;
+
+    public function __construct($product_id = "product_id", $user_id = "user_id", $address_id)
+    {
+        $this->product_id = $product_id;
+        $this->user_id = $user_id;
+        $this->address_id = $address_id;
+    }
+
+    //FUNCTION RANDOM CODE 
+    public function generateRandomCode()
+    {
+        $prefix = 'GAMS'; // You can customize the prefix
+        $randomCode = $prefix . uniqid() . mt_rand(1000, 9999);
+
+        return $randomCode;
+    }
+
+    public function buyProduct()
+    {
+        //set time
+        date_default_timezone_set("Asia/Jakarta");
+        $date = ("Y-m-d H-i-s");
+
+        //mengambil data dari generateRandomCode()
+        $random_code = $this->generateRandomCode();
+
+        //define database
+        $db = new database();
+
+        //open tb_cart
+        $query_cart = "SELECT * FROM tb_cart WHERE id_user = ?";
+        $query_cart = $db->getConnection()->prepare($query_cart);
+        $query_cart->bind_param("s", $this->user_id);
+        $query_cart->execute();
+
+        //query insert into tb_ordered_product
+        $query_buy = "INSERT INTO `tb_ordered_product`(`id_user`, `id_product`, `id_address`,`date`, `random_code`) 
+                        VALUES (?,?,?,?,?)";
+        $query_buy = $db->getConnection()->prepare($query_buy);
+        $query_buy->bind_param("sssss", $this->user_id, $this->product_id, $this->address_id, $date, $random_code);
+
+        if ($query_buy->execute()) {
+            //delete data from tb_cart
+            $query_delete = "DELETE FROM `tb_cart` WHERE id_user = ?";
+            $query_delete = $db->getConnection()->prepare($query_delete);
+            $query_delete->bind_param("s", $this->user_id);
+            $query_delete->execute();
+            
+            echo "<script>
+                alert('Checkout berhasil');
+            </script>";
+            header("Location: checkout.php");
+        } else {
+            echo "<script>
+            alert('Checkout gagal');
+        </script>";
+            header("Location: cart.php");
         }
     }
 }

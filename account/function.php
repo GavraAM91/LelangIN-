@@ -240,7 +240,7 @@ class account
         $db = new database();
 
         //open query 
-        
+
         //delete SESSION
         session_start();
         $_SESSION = [];
@@ -344,5 +344,40 @@ class account_setting
     {
         $this->username = $username;
         $this->password = $password;
+    }
+}
+
+class address
+{
+    private $user_id, $address_id, $desa, $kecamatan, $kota, $provinsi, $negara;
+
+    public function __construct($user_id, $address_id, $desa, $kecamatan, $kota, $provinsi, $negara)
+    {
+        $this->user_id = $user_id;
+        $this->address_id = $address_id;
+        $this->desa = $desa;
+        $this->kecamatan = $kecamatan;
+        $this->kota = $kota;
+        $this->provinsi = $kota;
+        $this->negara = $negara;
+    }
+
+    public function address()
+    {
+        //initilize database
+        $db = new database();
+
+        $query_address = "UPDATE `tb_address` SET `desa`=?, `kecamatan`=?, `kota/kabupaten`=?, `provinsi`=?, `negara`=? WHERE id_user = ?";
+        $query_address = $db->getConnection()->prepare($query_address);
+        $query_address->bind_param("ssssss", $this->desa, $this->kecamatan, $this->kota, $this->provinsi, $this->negara, $this->user_id);
+        if ($query_address->execute()) {
+            echo "<script>
+                alert('update alamat berhasil!');
+            </script>";
+        } else {
+            echo "<script>
+            alert('update alamat berhasil!');
+                 </script>";
+        }
     }
 }

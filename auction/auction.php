@@ -25,18 +25,29 @@ $data = $query->fetch_assoc();
 $data_user = $db->getConnection()->query("SELECT id_user FROM tb_account WHERE username='$userName'");
 $sql = $data_user->fetch_assoc();
 
+//inner join YANG BISA JALAN 
+// $query = "SELECT tb_account.username, tb_account.id_user, highest_price_auction.price
+// FROM tb_account 
+// INNER JOIN 
+//     (SELECT * FROM tb_auction ORDER BY price DESC LIMIT 1) AS highest_price_auction 
+// ON tb_account.id_user = highest_price_auction.id_user";
+
 //inner join
-$query = "SELECT tb_account.username, tb_account.id_user, highest_price_auction.price
-FROM tb_account 
-INNER JOIN 
-    (SELECT * FROM tb_auction ORDER BY price DESC LIMIT 1) AS highest_price_auction 
-ON tb_account.id_user = highest_price_auction.id_user";
+$query = "SELECT tb_account.username, tb_account.id_user, highest_price_auction.price, tb_product.id_product
+FROM tb_account
+JOIN 
+    (SELECT id_user, price
+     FROM tb_auction
+     WHERE id_product = '$id' 
+     ORDER BY price DESC 
+     LIMIT 1) AS highest_price_auction 
+ON tb_account.id_user = highest_price_auction.id_user
+JOIN tb_product ON tb_product.id_product = '$id'";
+
 
 $result = $db->getConnection()->query($query);
 $auction_data = $result->fetch_assoc();
 
-// var_dump($auction_data);
-// exit;
 
 if (isset($_POST['add_bid'])) {
 

@@ -15,6 +15,7 @@ class IDGenerator
     }
 }
 
+
 class database
 {
     private $host = "localhost"; // Host database
@@ -66,6 +67,7 @@ class product
         $this->quantity = $quantity;
         $this->price = $price;
     }
+
 
     public function addProduct()
     {
